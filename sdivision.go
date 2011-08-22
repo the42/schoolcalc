@@ -16,32 +16,39 @@ import (
 	"big"
 )
 
-// Format specifiers
+// Calculation specifiers affecting precision once the dividend is exhausted, but the remainder is not zero
 const (
-	DisplayControlDefault    int8 = 10 // per default, calculate up to 10 digits precision
-	DisplayControlDefaultMax int8 = -1 // 127 digits maximum precision
+	SDivPrecReached uint8 = 1 << 7               // a flag; if set, division stops once the remainder is zero
+	SDivPrecDefault       = SDivPrecReached | 10 // per default, calculate until the remainder reaches 0 or a maximum of 10 iterations past dividend
+	SDivPrecMax           = 127                  // 127 digits maximum precision
 )
 
 type SDivide struct {
-	Dividend, Divisor, Result, Remainder string
-	ISteps                               []string
-	Prec                                 int8
-	Exact                                bool
-	Negative                             bool
+	Dividend, Divisor,
+	NormalizedDividend, NormalizedDivisor,
+	Result, Remainder string
+	DivisionSteps []string
+	Prec          uint8
+	Exact         bool
+	Negative      bool
 }
 
+// SchoolDivide accepts two strings and will return the result and intermediate remainders.
 // dividend and divisor are strings, both may contain fractions denoted by '.'
-// prec set's the number of digits fraction to calculate, if the remainder is non-zero.
-// prec set's the highest precision; If the remainder reaches zero before, calculation
-// will stop.
-func SchoolDivide(dividend, divisor string, prec int8) (sd *SDivide, err os.Error) {
+// prec set's the precision, see Calculation specifiers
+func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Error) {
+
+	var dividendsuffixlen, divisorsuffixlen int
+	var endresult string
+	var runningprec uint8
+	var dividendep int
 
 	mydividend := dividend
 	mydivisor := divisor
-	var dividendsuffixlen, divisorsuffixlen int
-	var endresult, intermediatedividend string
-	var runningprec int8
-	var dividendep int
+	first := true
+	exact := false
+	steps := []string{}
+	negative := false
 
 	if len(mydividend) <= 0 {
 		return nil, fmt.Errorf("Dividend must not be null")
@@ -50,8 +57,6 @@ func SchoolDivide(dividend, divisor string, prec int8) (sd *SDivide, err os.Erro
 	if len(mydivisor) <= 0 {
 		return nil, fmt.Errorf("Divisor must not be null")
 	}
-
-	negative := false
 
 	if mydividend[0] == '-' {
 		negative = !negative
@@ -63,20 +68,18 @@ func SchoolDivide(dividend, divisor string, prec int8) (sd *SDivide, err os.Erro
 		mydivisor = mydivisor[1:]
 	}
 
-	if len(mydividend) <= 0 {
-		return nil, fmt.Errorf("Dividend must not be null")
-	}
-
-	if len(mydivisor) <= 0 {
-		return nil, fmt.Errorf("Divisor must not be null")
-	}
-
+	// check if the divisor contains a fraction
 	splitstrings := strings.Split(mydivisor, ".")
 	if slen := len(splitstrings); slen > 2 {
 		return nil, fmt.Errorf("Not a valid divisor: \"%s\"", divisor)
 	} else if slen == 2 {
+		// if it contains a suffix, we determine the length of it
 		divisorsuffixlen = len(splitstrings[1])
-		mydivisor = splitstrings[0] + splitstrings[1]
+		mydivisor = splitstrings[1]
+		// treatment of 0.xyz numerlas; if the significant part doesn't start with "0" it can be a part of the numeral
+		if splitstrings[0] != "0" {
+			mydivisor = splitstrings[0] + mydivisor
+		}
 	}
 
 	splitstrings = strings.Split(mydividend, ".")
@@ -84,63 +87,89 @@ func SchoolDivide(dividend, divisor string, prec int8) (sd *SDivide, err os.Erro
 		return nil, fmt.Errorf("Not a valid dividend: \"%s\"", dividend)
 	} else if slen == 2 {
 		dividendsuffixlen = len(splitstrings[1])
-		mydividend = splitstrings[0] + splitstrings[1]
+		mydividend = splitstrings[1]
+		if splitstrings[0] != "0" {
+			mydividend = splitstrings[0] + mydividend
+		}
 	}
 
 	padlen := dividendsuffixlen - divisorsuffixlen
 
+	// depending on padlenght, we have to fill the dividend or the divisor with padlen zeros
 	if padlen < 0 {
-		mydividend += strings.Repeat("0", padlen*-1)
+		mydividend += strings.Repeat("0", -padlen)
 	} else if padlen > 0 {
 		mydivisor += strings.Repeat("0", padlen)
 	}
 
-	bigdivisor, _ := big.NewInt(0).SetString(mydivisor, 0)
-	bigdividend, _ := big.NewInt(0).SetString(mydividend, 0)
-	bigintermediateremainder := big.NewInt(0)
-	bigintermediatedividend := big.NewInt(0)
+	bigdivisor, ok := big.NewInt(0).SetString(mydivisor, 0)
+	if !ok {
+		return nil, fmt.Errorf("Not a divisor: \"%s\"", mydivisor)
+	}
 
-	for {
-		intermediatedividend = mydividend[0:dividendep]
-		bigintermediatedividend, _ = big.NewInt(0).SetString(intermediatedividend, 0)
+	bigintermediatedividend := big.NewInt(0)
+	onebig := big.NewInt(0)
+
+	// start to divide as soon as the dividend is greater than the divisor
+	for dividendep = 1; ; dividendep++ {
+		if bigintermediatedividend, ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 0); !ok {
+			return nil, fmt.Errorf("Not a dividend: \"%s\"", mydividend[0:dividendep])
+		}
+
+		// We are done checking once the running dividend is bigger than the divisor or if it can't get bigger because dividend < divisor
 		if !(bigintermediatedividend.Cmp(bigdivisor) < 0 && dividendep < len(mydividend)) {
 			break
 		}
-		dividendep++
 	}
 
 	for {
-
 		intermediateresult := big.NewInt(0).Div(bigintermediatedividend, bigdivisor)
-		bigintermediateremainder = big.NewInt(0).Rem(bigintermediatedividend, bigdivisor)
-
-		// endresult erst später dazufügen
 		endresult += intermediateresult.String()
+		bigintermediatedividend = big.NewInt(0).Mul(big.NewInt(10), big.NewInt(0).Rem(bigintermediatedividend, bigdivisor))
 
 		if dividendep < len(mydividend) {
+			// if the dividend is not exhausted, we have to add the next position of the dividend to the running dividend
 
-			onebig, _ := big.NewInt(0).SetString(string(mydividend[dividendep]), 0)
+			if _, ok = onebig.SetString(string(mydividend[dividendep]), 0); !ok {
+				return nil, fmt.Errorf("Not a number: \"%c\" (in %s)", mydividend[dividendep], mydividend)
+			}
+
+			bigintermediatedividend.Add(onebig, bigintermediatedividend)
+			// the running dividend is an intermediate step to record
+			steps = append(steps, bigintermediatedividend.String())
+
 			dividendep++
 
-			bigintermediatedividend = big.NewInt(0).Mul(big.NewInt(10), bigintermediateremainder)
-			bigintermediatedividend = big.NewInt(0).Add(onebig, bigintermediatedividend)
+		} else if (127&prec)-runningprec > 0 {
+			// if the dividend is exhausted, calculations continues ...
 
-		} else if prec-runningprec > 0 {
-			bigintermediatedividend = big.NewInt(0).Mul(bigintermediateremainder, big.NewInt(10))
+			steps = append(steps, bigintermediatedividend.String())
+
+			// ... until we reach maximum desired precision or the remainder(= running dividend) is zero
+			if bigintermediatedividend.Cmp(big.NewInt(0)) == 0 && (prec&SDivPrecReached) > 0 {
+				exact = true
+				break
+			}
+
+			// the first time we exhaust the running divided, the result will be fractional
+			if first {
+				endresult += "."
+				first = false
+			}
 			runningprec++
 		} else {
 			break
 		}
 	}
 
-	// EVTL gar nicht nötig?
-	if bigdividend.Cmp(bigdivisor) < 0 {
-		endresult = "0." + endresult
-	}
-
 	if negative {
 		endresult = "-" + endresult
 	}
 
-	return &SDivide{Dividend: dividend, Divisor: divisor}, nil
+	return &SDivide{Dividend: dividend, Divisor: divisor, Result: endresult, Remainder: bigintermediatedividend.String(),
+		NormalizedDividend: mydividend, NormalizedDivisor: mydivisor,
+		DivisionSteps: steps,
+		Prec:          prec,
+		Exact:         exact,
+		Negative:      negative}, nil
 }
