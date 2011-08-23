@@ -16,7 +16,7 @@ import (
 	"big"
 )
 
-// Calculation specifiers affecting precision once the dividend is exhausted, but the remainder is not zero
+// Calculation specifiers affecting precision once the dividend is exhausted, but the remainder is not (yet) zero
 const (
 	SDivPrecReached uint8 = 1 << 7               // a flag; if set, division stops once the remainder is zero
 	SDivPrecDefault       = SDivPrecReached | 10 // per default, calculate until the remainder reaches 0 or a maximum of 10 iterations past dividend
@@ -34,6 +34,7 @@ type SDivide struct {
 }
 
 // SchoolDivide accepts two strings and will return the result and intermediate remainders.
+//
 // dividend and divisor are strings, both may contain fractions denoted by '.'
 // prec set's the precision, see Calculation specifiers
 func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Error) {
@@ -76,12 +77,13 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 		// if it contains a suffix, we determine the length of it
 		divisorsuffixlen = len(splitstrings[1])
 		mydivisor = splitstrings[1]
-		// treatment of 0.xyz numerlas; if the significant part doesn't start with "0" it can be a part of the numeral
+		// treatment of 0.xyz numerals; if the significant part doesn't start with "0" it can be a part of the numeral
 		if splitstrings[0] != "0" {
 			mydivisor = splitstrings[0] + mydivisor
 		}
 	}
 
+	// check if the dividend contains a fraction
 	splitstrings = strings.Split(mydividend, ".")
 	if slen := len(splitstrings); slen > 2 {
 		return nil, fmt.Errorf("Not a valid dividend: \"%s\"", dividend)
@@ -93,6 +95,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 		}
 	}
 
+	// How many zeros have to be appended to get rid of fractional numeric parts both for dividend and divisor
 	padlen := dividendsuffixlen - divisorsuffixlen
 
 	// depending on padlenght, we have to fill the dividend or the divisor with padlen zeros
@@ -141,11 +144,11 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 			dividendep++
 
 		} else if (127&prec)-runningprec > 0 {
-			// if the dividend is exhausted, calculations continues ...
+			// if the dividend is exhausted, calculation continues ...
 
 			steps = append(steps, bigintermediatedividend.String())
 
-			// ... until we reach maximum desired precision or the remainder(= running dividend) is zero
+			// ... until we reach the maximum desired precision or the remainder(= running dividend) is zero
 			if bigintermediatedividend.Cmp(big.NewInt(0)) == 0 && (prec&SDivPrecReached) > 0 {
 				exact = true
 				break
