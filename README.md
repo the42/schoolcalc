@@ -17,7 +17,7 @@ Library:
   goinstall github.com/the42/sdivision
 
 Programs:
-  More to come. I plan a command line program and probalby sthg. new to test the "new" templating
+  More to come. I plan a command line program and probalby sthg. to test the "new" templating
 
 Usage
 -----
