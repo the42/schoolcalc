@@ -6,12 +6,9 @@ Short description
 Features
 --------
 
-* Conversion between [polar
-  coordinates](http://en.wikipedia.org/wiki/Polar_coordinate_system) to
-  cartesian coordinates
-* Supports a set of standard [reference
-  ellipsoids](http://en.wikipedia.org/wiki/Reference_ellipsoid) (WGS84, Airy,
-  Bessel) as well as user defined ones
+* Arbitrary precision mathematics
+* Negative numbers & fractional numbers supported
+* Intermediate steps are returned for display / contol
 
 Installation
 ------------
@@ -20,11 +17,13 @@ Library:
   goinstall github.com/the42/sdivision
 
 Programs:
+  More to come. I plan a command line program and probalby sthg. new to test the "new" templating
 
 Usage
 -----
 
-All features provided by the package are covered by test cases.
+Bold statement: "All features provided by the package are covered by test cases."
+Not true as of August 23 2011
 
 License
 -------
@@ -39,3 +38,5 @@ Testing
 To run the tests:
 
   make test
+  
+  
