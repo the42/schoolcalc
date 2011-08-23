@@ -37,6 +37,6 @@ Testing
 
 To run the tests:
 
-  make test
+  make test - Not done as of Aug. 23 2011
   
   
