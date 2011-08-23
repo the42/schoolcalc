@@ -23,11 +23,16 @@ const (
 	SDivPrecMax           = 127                  // 127 digits maximum precision
 )
 
+type Iremainder struct {
+  Indent int
+  Iremainder string
+}
+
 type SDivide struct {
 	Dividend, Divisor,
 	NormalizedDividend, NormalizedDivisor,
 	Result, Remainder string
-	DivisionSteps []string
+	DivisionSteps []Iremainder
 	Prec          uint8
 	Exact         bool
 	Negative      bool
@@ -48,7 +53,8 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 	mydivisor := divisor
 	first := true
 	exact := false
-	steps := []string{}
+	steps := []Iremainder{}
+	onestep := Iremainder{}
 	negative := false
 
 	if len(mydividend) <= 0 {
@@ -105,7 +111,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 		mydivisor += strings.Repeat("0", padlen)
 	}
 
-	bigdivisor, ok := big.NewInt(0).SetString(mydivisor, 0)
+	bigdivisor, ok := big.NewInt(0).SetString(mydivisor, 10)
 	if !ok {
 		return nil, fmt.Errorf("Not a divisor: \"%s\"", mydivisor)
 	}
@@ -115,7 +121,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 
 	// start to divide as soon as the dividend is greater than the divisor
 	for dividendep = 1; ; dividendep++ {
-		if bigintermediatedividend, ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 0); !ok {
+		if _ , ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 10); !ok {
 			return nil, fmt.Errorf("Not a dividend: \"%s\"", mydividend[0:dividendep])
 		}
 
@@ -132,21 +138,25 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 
 		if dividendep < len(mydividend) {
 			// if the dividend is not exhausted, we have to add the next position of the dividend to the running dividend
-
-			if _, ok = onebig.SetString(string(mydividend[dividendep]), 0); !ok {
+			if _, ok = onebig.SetString(string(mydividend[dividendep]), 10); !ok {
 				return nil, fmt.Errorf("Not a number: \"%c\" (in %s)", mydividend[dividendep], mydividend)
 			}
 
-			bigintermediatedividend.Add(onebig, bigintermediatedividend)
+			bigintermediatedividend.Add(bigintermediatedividend, onebig)
+			
 			// the running dividend is an intermediate step to record
-			steps = append(steps, bigintermediatedividend.String())
+			onestep.Iremainder = bigintermediatedividend.String()
+			onestep.Indent = dividendep - len(onestep.Iremainder) + 1
+			steps = append(steps, onestep)
 
 			dividendep++
 
 		} else if (127&prec)-runningprec > 0 {
 			// if the dividend is exhausted, calculation continues ...
 
-			steps = append(steps, bigintermediatedividend.String())
+			onestep.Iremainder = bigintermediatedividend.String()
+			onestep.Indent = dividendep+int(runningprec)-len(onestep.Iremainder) + 1
+			steps = append(steps, onestep)
 
 			// ... until we reach the maximum desired precision or the remainder(= running dividend) is zero
 			if bigintermediatedividend.Cmp(big.NewInt(0)) == 0 && (prec&SDivPrecReached) > 0 {
