@@ -2,13 +2,22 @@ sdivision - Support pupils when learning to divide
 ==================================================
 
 Short description
+-----------------
+A library for dividing integers or rationals.
+It calculates intermidate steps when performing divisions.
+Supports negative numerals.
+
+Learning to divide is particulary hard for pupils and this library
+provides a method which returns intermediate steps and indention hints
+to display those intermediate remainders on an output device.
+
 
 Features
 --------
 
 * Arbitrary precision mathematics
 * Negative numbers & fractional numbers supported
-* Intermediate steps are returned for display / contol
+* Intermediate steps are returned for display / control
 
 Installation
 ------------
@@ -22,8 +31,7 @@ Programs:
 Usage
 -----
 
-Bold statement: "All features provided by the package are covered by test cases."
-Not true as of August 23 2011
+All features provided by the package are covered by test cases.
 
 License
 -------
@@ -37,6 +45,4 @@ Testing
 
 To run the tests:
 
-  make test - Not done as of Aug. 23 2011
-  
-  
+  make test
