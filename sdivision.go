@@ -24,8 +24,8 @@ const (
 )
 
 type Iremainder struct {
-  Indent int
-  Iremainder string
+	Indent     int
+	Iremainder string
 }
 
 type SDivide struct {
@@ -121,7 +121,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 
 	// start to divide as soon as the dividend is greater than the divisor
 	for dividendep = 1; ; dividendep++ {
-		if _ , ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 10); !ok {
+		if _, ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 10); !ok {
 			return nil, fmt.Errorf("Not a dividend: \"%s\"", mydividend[0:dividendep])
 		}
 
@@ -143,7 +143,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 			}
 
 			bigintermediatedividend.Add(bigintermediatedividend, onebig)
-			
+
 			// the running dividend is an intermediate step to record
 			onestep.Iremainder = bigintermediatedividend.String()
 			onestep.Indent = dividendep - len(onestep.Iremainder) + 1
@@ -155,7 +155,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Err
 			// if the dividend is exhausted, calculation continues ...
 
 			onestep.Iremainder = bigintermediatedividend.String()
-			onestep.Indent = dividendep+int(runningprec)-len(onestep.Iremainder) + 1
+			onestep.Indent = dividendep + int(runningprec) - len(onestep.Iremainder) + 1
 			steps = append(steps, onestep)
 
 			// ... until we reach the maximum desired precision or the remainder(= running dividend) is zero
