@@ -5,18 +5,35 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"bufio"
 )
 
-func printsdresult(sd *sdivision.SDivide, err os.Error) {
+func normalizeSDivInput(s string) (out string) {
+
+	for _, ch := range s {
+		if ch != ' ' {
+			out += string(ch)
+		}
+	}
+
+	return
+}
+
+func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, outputdivided string) bool {
+	return inputdividend == outputdivided && inputdivisor == outputdivisor
+}
+
+func printdivresult(sd *sdivision.SDivide, err os.Error) {
 	var blank string
 	if err == nil {
 		fmt.Printf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
-		fmt.Printf("%s : %s = %s\n", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
+		if !inputSDivisequaltoResultSDiv(sd.Dividend, sd.Divisor, sd.NormalizedDividend, sd.NormalizedDivisor) {
+			fmt.Printf("%s : %s = %s\n", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
+		}
 		for _, elm := range sd.DivisionSteps {
 			blank = strings.Repeat(" ", elm.Indent)
 			fmt.Printf("%s%s\n", blank, elm.Iremainder)
 		}
-		fmt.Printf("\n%#v\n\n", sd)
 	} else {
 		fmt.Printf("%s", err)
 	}
@@ -25,19 +42,37 @@ func printsdresult(sd *sdivision.SDivide, err os.Error) {
 
 func main() {
 
-	printsdresult(sdivision.SchoolDivide("100", "5", sdivision.SDivPrecReached|8))
-	printsdresult(sdivision.SchoolDivide("100.5", "5", sdivision.SDivPrecReached|8))
-	printsdresult(sdivision.SchoolDivide("100.5", "5.5", sdivision.SDivPrecReached|8))
-	printsdresult(sdivision.SchoolDivide("-100.5", "5.56", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("5", "100", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("-5", "100", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("2", "0.5", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("0.5", "0.5", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("10065767", "55.7", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("0", "1", sdivision.SDivPrecReached|2))
+	var lines int
+	var instring string
 
-	printsdresult(sdivision.SchoolDivide("100X65767", "55.7", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("100X65767", "Y.7", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("", "Y.7", sdivision.SDivPrecReached|2))
-	printsdresult(sdivision.SchoolDivide("10065767", "0", sdivision.SDivPrecReached|2))
+	liner, err := bufio.NewReaderSize(os.Stdin, 1000)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "sdivcon: %s (exiting)\n", err)
+		os.Exit(3)
+	}
+
+	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "sdivcon %d: %s\n", lines, err)
+			continue
+		}
+
+		if prefix {
+			fmt.Fprintf(os.Stderr, "sdivcon %d: too long, exceeding 1000 characters (ignoring)\n", lines)
+			continue
+		}
+
+		lines++
+
+		instring = normalizeSDivInput(string(data))
+
+		splitstrings := strings.Split(instring, ":")
+		if slen := len(splitstrings); slen != 2 {
+			fmt.Fprintf(os.Stderr, "sdivcon %d: not a valid divisor:dividend (ignoring)\n", lines)
+			continue
+		}
+
+		printdivresult(sdivision.SchoolDivide(splitstrings[0], splitstrings[1], sdivision.SDivPrecReached|2))
+	}
 }
