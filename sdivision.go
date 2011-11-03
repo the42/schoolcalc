@@ -12,7 +12,6 @@ package sdivision
 import (
 	"strings"
 	"fmt"
-	"os"
 	"big"
 )
 
@@ -42,7 +41,7 @@ type SDivide struct {
 //
 // dividend and divisor are strings, both may contain fractions denoted by '.'
 // prec set's the precision, see Calculation specifiers
-func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err os.Error) {
+func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error) {
 
 	var dividendsuffixlen, divisorsuffixlen int
 	var endresult string

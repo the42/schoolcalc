@@ -94,7 +94,7 @@ func TestSchoolDivision(t *testing.T) {
 				t.Errorf("SchoolDivide [%d]: Expected %v, got %v", cnt, test.out, out)
 			}
 		} else if err != nil && test.out != nil {
-			t.Errorf("SchoolDivide [%d]: Got error %s but test case says it's save to divide %v", cnt, err.String(), test.in)
+			t.Errorf("SchoolDivide [%d]: Got error %s but test case says it's save to divide %v", cnt, err.Error(), test.in)
 		} else if err == nil && test.out == nil {
 			t.Errorf("SchoolDivide [%d]: Got a result %v while test case says it's erroneous to divide %v", cnt, test.out, test.in)
 		}

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/the42/sdivision"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"bufio"
@@ -23,7 +24,7 @@ func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, ou
 	return inputdividend == outputdivided && inputdivisor == outputdivisor
 }
 
-func printdivresult(sd *sdivision.SDivide, err os.Error) {
+func printdivresult(sd *sdivision.SDivide, err error) {
 	var blank string
 	if err == nil {
 		fmt.Printf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
@@ -51,7 +52,7 @@ func main() {
 		os.Exit(3)
 	}
 
-	for data, prefix, err := liner.ReadLine(); err != os.EOF; data, prefix, err = liner.ReadLine() {
+	for data, prefix, err := liner.ReadLine(); err != io.EOF; data, prefix, err = liner.ReadLine() {
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "sdivcon %d: %s\n", lines, err)
