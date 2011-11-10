@@ -10,9 +10,9 @@
 package sdivision
 
 import (
-	"strings"
 	"fmt"
-	"big"
+	"math/big"
+	"strings"
 )
 
 // Calculation specifiers affecting precision once the dividend is exhausted, but the remainder is not (yet) zero
