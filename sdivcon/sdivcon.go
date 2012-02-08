@@ -46,13 +46,9 @@ func main() {
 	var lines int
 	var instring string
 
-	liner, err := bufio.NewReaderSize(os.Stdin, 1000)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "sdivcon: %s (exiting)\n", err)
-		os.Exit(3)
-	}
+	reader := bufio.NewReaderSize(os.Stdin, 1000)
 
-	for data, prefix, err := liner.ReadLine(); err != io.EOF; data, prefix, err = liner.ReadLine() {
+	for data, prefix, err := reader.ReadLine(); err != io.EOF; data, prefix, err = reader.ReadLine() {
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "sdivcon %d: %s\n", lines, err)
