@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/the42/sdivision"
+	"bufio"
 	"fmt"
+	"github.com/the42/schoolcalc"
 	"io"
 	"os"
 	"strings"
-	"bufio"
 )
 
 func normalizeSDivInput(s string) (out string) {
@@ -16,7 +16,6 @@ func normalizeSDivInput(s string) (out string) {
 			out += string(ch)
 		}
 	}
-
 	return
 }
 
@@ -24,7 +23,7 @@ func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, ou
 	return inputdividend == outputdivided && inputdivisor == outputdivisor
 }
 
-func printdivresult(sd *sdivision.SDivide, err error) {
+func printdivresult(sd *schoolcalc.SDivide, err error) {
 	var blank string
 	if err == nil {
 		fmt.Printf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
@@ -33,7 +32,7 @@ func printdivresult(sd *sdivision.SDivide, err error) {
 		}
 		for _, elm := range sd.DivisionSteps {
 			blank = strings.Repeat(" ", elm.Indent)
-			fmt.Printf("%s%s\n", blank, elm.Iremainder)
+			fmt.Printf("%*s\n", blank, elm.Iremainder)
 		}
 	} else {
 		fmt.Printf("%s", err)
@@ -70,6 +69,6 @@ func main() {
 			continue
 		}
 
-		printdivresult(sdivision.SchoolDivide(splitstrings[0], splitstrings[1], sdivision.SDivPrecReached|2))
+		printdivresult(schoolcalc.SchoolDivide(splitstrings[0], splitstrings[1], schoolcalc.SDivPrecReached|2))
 	}
 }

@@ -1,11 +1,30 @@
-sdivision - Support pupils when learning to divide
-==================================================
+schoolcalc - Support pupils when learning to divide
+===================================================
 
 Short description
 -----------------
-A library for dividing integers or rationals.
-It calculates intermidate steps when performing divisions.
+A library for
+
+* dividing integers or rationals. It calculates intermidate steps when performing divisions.
 Supports negative numerals.
+* Zapfenrechnung. A Zapfenrechnung (Zapfen rechnen) looks like this:
+
+         27 * 2 = 54
+         54 * 3 = 162
+        162 * 4 = 648
+        648 * 5 = 3240
+       3240 * 6 = 19440
+      19440 * 7 = 136080
+     136080 * 8 = 1088640
+    1088640 * 9 = 9797760
+    9797760 / 2 = 4898880
+    4898880 / 3 = 1632960
+    1632960 / 4 = 408240
+     408240 / 5 = 81648
+      81648 / 6 = 13608
+      13608 / 7 = 1944
+       1944 / 8 = 243
+        243 / 9 = 27
 
 Learning to divide is particulary hard for pupils and this library
 provides a method which returns intermediate steps and indention hints
@@ -16,17 +35,17 @@ Features
 --------
 
 * Arbitrary precision mathematics
-* Negative numbers & fractional numbers supported
-* Intermediate steps are returned for display / control
+* Division: Negative numbers & fractional numbers supported when deviding the pen & paper method
+* Division: Intermediate steps are returned for display / control
 
 Installation
 ------------
 
 Library:
-  goinstall github.com/the42/sdivision
+  go install github.com/the42/schoolcalc
 
 Programs:
-  More to come. I plan a command line program and probalby sthg. to test the "new" templating
+  Command line program sdivcon
 
 Usage
 -----
@@ -45,4 +64,4 @@ Testing
 
 To run the tests:
 
-  make test
+  go test github.com/the42/schoolcalc

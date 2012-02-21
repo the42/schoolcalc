@@ -3,7 +3,7 @@
 // that can be found in the LICENSE file.
 
 // Automated tests for the sdivision package
-package sdivision
+package schoolcalc
 
 import (
 	"testing"

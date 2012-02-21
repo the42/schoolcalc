@@ -1,16 +1,15 @@
-// Copyright 2011 Johann Höchtl. All rights reserved.
+// Copyright 2011, 2012 Johann Höchtl. All rights reserved.
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
-
-//target:github.com/the42/sdivision
 
 // This package provides functionality to calculate intermediate
 // steps for division "the pen and paper method". Thus it may support
 // controlling intermediate steps when pupils start learning to divide.
-package sdivision
+package schoolcalc
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"strings"
 )
@@ -184,4 +183,56 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 		Prec:          prec,
 		Exact:         exact,
 		Negative:      negative}, nil
+}
+
+// A 'Zapfen' consists of 8 multiplications and 8 divisions.
+// Example:
+//
+//         27 * 2 = 54
+//         54 * 3 = 162
+//        162 * 4 = 648
+//        648 * 5 = 3240
+//       3240 * 6 = 19440
+//      19440 * 7 = 136080
+//     136080 * 8 = 1088640
+//    1088640 * 9 = 9797760
+//    9797760 / 2 = 4898880
+//    4898880 / 3 = 1632960
+//    1632960 / 4 = 408240
+//     408240 / 5 = 81648
+//      81648 / 6 = 13608
+//      13608 / 7 = 1944
+//       1944 / 8 = 243
+//        243 / 9 = 27
+//
+// The struct stores the eight intermediary multiplications, the eight divisions and
+// the string length of the longest product to allow proper result formatting.
+type Zapfen struct {
+	Zapfenzahl int
+	Multzapfen [8]int
+	Divzapfen  [8]int
+	Longest    int
+}
+
+func ZapfenRechnung(zapfenzahl int) (rv Zapfen) {
+	rv.Zapfenzahl = zapfenzahl
+
+	// eight multiplication
+	for i := 2; i < 10; i++ {
+		rv.Multzapfen[i-2] = zapfenzahl * i
+		zapfenzahl = rv.Multzapfen[i-2]
+	}
+
+	// calculate the string length of the longest product to allow proper result formatting
+	rv.Longest = int(math.Log10(float64(rv.Multzapfen[7])) + 1)
+	if rv.Longest == 0 {
+		rv.Longest = 1
+	}
+
+	for i := 2; i < 10; i++ {
+		rv.Divzapfen[i-2] = zapfenzahl / i
+		zapfenzahl = rv.Divzapfen[i-2]
+	}
+
+	return
 }
