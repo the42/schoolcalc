@@ -1,4 +1,4 @@
-// Copyright 2011, 2012 Johann Höchtl. All rights reserved.
+// Copyright 2011, 2012  Johann Höchtl. All rights reserved.
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
@@ -207,6 +207,32 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 //
 // The struct stores the eight intermediary multiplications, the eight divisions and
 // the string length of the longest product to allow proper result formatting.
+
+// Sample program:
+
+//    func main() {
+//      
+//      var zapfenzahl int
+//      _, err := fmt.Fscanf(os.Stdin, "%d", &zapfenzahl)
+//      
+//      if err != nil {
+//        panic(err)
+//      }
+//      
+//      rv := ZapfenRechnung(zapfenzahl)
+//    
+//      input := rv.Zapfenzahl
+//      for i:= 2; i < 10; i++ {
+//        fmt.Fprintf(os.Stdout, "%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
+//        input = rv.Multzapfen[i-2]
+//      }
+//      
+//      for i:= 2; i < 10; i++ {
+//        fmt.Fprintf(os.Stdout, "%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
+//        input = rv.Divzapfen[i-2]
+//      }
+//    }
+//
 type Zapfen struct {
 	Zapfenzahl int
 	Multzapfen [8]int
@@ -217,7 +243,7 @@ type Zapfen struct {
 func ZapfenRechnung(zapfenzahl int) (rv Zapfen) {
 	rv.Zapfenzahl = zapfenzahl
 
-	// eight multiplication
+	// eight multiplications, starting with "2"
 	for i := 2; i < 10; i++ {
 		rv.Multzapfen[i-2] = zapfenzahl * i
 		zapfenzahl = rv.Multzapfen[i-2]
@@ -229,6 +255,8 @@ func ZapfenRechnung(zapfenzahl int) (rv Zapfen) {
 		rv.Longest = 1
 	}
 
+	// perform eight divisions, starting to divide the last product of the preceding calculation with "2".
+	// The end result will be calling zapfenzahl
 	for i := 2; i < 10; i++ {
 		rv.Divzapfen[i-2] = zapfenzahl / i
 		zapfenzahl = rv.Divzapfen[i-2]

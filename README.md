@@ -9,8 +9,7 @@ A library for
 Supports negative numerals.
 * Zapfenrechnung. A Zapfenrechnung (Zapfen rechnen) looks like this:
 
-<pre><code>
-         27 * 2 = 54
+<pre><code>         27 * 2 = 54
          54 * 3 = 162
         162 * 4 = 648
         648 * 5 = 3240
@@ -25,20 +24,20 @@ Supports negative numerals.
       81648 / 6 = 13608
       13608 / 7 = 1944
        1944 / 8 = 243
-        243 / 9 = 27
-</code></pre>
+        243 / 9 = 27</code></pre>
 
 Learning to divide is particulary hard for pupils and this library
-provides a method which returns intermediate steps and indention hints
+provides with SchoolDivide a method which returns intermediate steps and indention hints
 to display those intermediate remainders on an output device.
 
 
 Features
 --------
 
-* Arbitrary precision mathematics
+* Division: Arbitrary precision mathematics
 * Division: Negative numbers & fractional numbers supported when deviding the pen & paper method
 * Division: Intermediate steps are returned for display / control
+* ZapfenRechnung
 
 Installation
 ------------
@@ -47,12 +46,13 @@ Library:
   go install github.com/the42/schoolcalc
 
 Programs:
-  Command line program sdivcon
+  Command line program sdivcon to display the intermediate results of SchoolDivide
 
 Usage
 -----
 
-All features provided by the package are covered by test cases.
+SchoolDivide is covered by test cases. ZapfenRechnung contains a short executable main program
+in the comments to the library function.
 
 License
 -------
