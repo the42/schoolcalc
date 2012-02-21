@@ -9,6 +9,7 @@ A library for
 Supports negative numerals.
 * Zapfenrechnung. A Zapfenrechnung (Zapfen rechnen) looks like this:
 
+<code>
          27 * 2 = 54
          54 * 3 = 162
         162 * 4 = 648
@@ -25,6 +26,7 @@ Supports negative numerals.
       13608 / 7 = 1944
        1944 / 8 = 243
         243 / 9 = 27
+</code>
 
 Learning to divide is particulary hard for pupils and this library
 provides a method which returns intermediate steps and indention hints
