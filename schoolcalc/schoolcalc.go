@@ -257,7 +257,7 @@ func ZapfenRechnung(zapfenzahl *big.Int) (rv Zapfen) {
 
 	// eight multiplications, starting with "2"
 	for i := 2; i < 10; i++ {
-		rv.Multzapfen[i-2] = new (big.Int)
+		rv.Multzapfen[i-2] = new(big.Int)
 		rv.Multzapfen[i-2].Mul(zapfenzahl, big.NewInt(int64(i)))
 		zapfenzahl = rv.Multzapfen[i-2]
 	}
@@ -271,7 +271,7 @@ func ZapfenRechnung(zapfenzahl *big.Int) (rv Zapfen) {
 	// perform eight divisions, starting to divide the last product of the preceding calculation with "2".
 	// The end result will be calling zapfenzahl
 	for i := 2; i < 10; i++ {
-	  	rv.Divzapfen[i-2] = new (big.Int)
+		rv.Divzapfen[i-2] = new(big.Int)
 		rv.Divzapfen[i-2].Div(zapfenzahl, big.NewInt(int64(i)))
 		zapfenzahl = rv.Divzapfen[i-2]
 	}
