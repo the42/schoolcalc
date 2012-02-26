@@ -9,7 +9,6 @@ package schoolcalc
 
 import (
 	"fmt"
-	"math"
 	"math/big"
 	"strings"
 )
@@ -205,52 +204,66 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 //       1944 / 8 = 243
 //        243 / 9 = 27
 //
+// Sample program:
+//    package main
+//    
+//    import (
+//    	"fmt"
+//    	"math/big"
+//    	"os"
+//    )
+//    
+//    func main() {
+//    
+//    	var strzapfenzahl string
+//    	_, err := fmt.Fscanf(os.Stdin, "%s", &strzapfenzahl)
+//    
+//    	if err != nil {
+//    		panic(err)
+//    	}
+//    
+//    	zapfenzahl, succ := big.NewInt(0).SetString(strzapfenzahl, 0)
+//    	if !succ {
+//    		panic(fmt.Sprintf("not a number :%s", strzapfenzahl))
+//    	}
+//    
+//    	rv := ZapfenRechnung(zapfenzahl)
+//    
+//    	fmt.Print(zapfenzahl)
+//    
+//    	input := rv.Zapfenzahl
+//    	for i := 2; i < 10; i++ {
+//    		fmt.Fprintf(os.Stdout, "%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
+//    		input = rv.Multzapfen[i-2]
+//    	}
+//    
+//    	for i := 2; i < 10; i++ {
+//    		fmt.Fprintf(os.Stdout, "%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
+//    		input = rv.Divzapfen[i-2]
+//    	}
+//    }
+
 // The struct stores the eight intermediary multiplications, the eight divisions and
 // the string length of the longest product to allow proper result formatting.
-
-// Sample program:
-
-//    func main() {
-//      
-//      var zapfenzahl int
-//      _, err := fmt.Fscanf(os.Stdin, "%d", &zapfenzahl)
-//      
-//      if err != nil {
-//        panic(err)
-//      }
-//      
-//      rv := ZapfenRechnung(zapfenzahl)
-//    
-//      input := rv.Zapfenzahl
-//      for i:= 2; i < 10; i++ {
-//        fmt.Fprintf(os.Stdout, "%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
-//        input = rv.Multzapfen[i-2]
-//      }
-//      
-//      for i:= 2; i < 10; i++ {
-//        fmt.Fprintf(os.Stdout, "%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
-//        input = rv.Divzapfen[i-2]
-//      }
-//    }
-//
 type Zapfen struct {
-	Zapfenzahl int
-	Multzapfen [8]int
-	Divzapfen  [8]int
+	Zapfenzahl *big.Int
+	Multzapfen [8]*big.Int
+	Divzapfen  [8]*big.Int
 	Longest    int
 }
 
-func ZapfenRechnung(zapfenzahl int) (rv Zapfen) {
+func ZapfenRechnung(zapfenzahl *big.Int) (rv Zapfen) {
 	rv.Zapfenzahl = zapfenzahl
 
 	// eight multiplications, starting with "2"
 	for i := 2; i < 10; i++ {
-		rv.Multzapfen[i-2] = zapfenzahl * i
+		rv.Multzapfen[i-2] = new (big.Int)
+		rv.Multzapfen[i-2].Mul(zapfenzahl, big.NewInt(int64(i)))
 		zapfenzahl = rv.Multzapfen[i-2]
 	}
 
 	// calculate the string length of the longest product to allow proper result formatting
-	rv.Longest = int(math.Log10(float64(rv.Multzapfen[7])) + 1)
+	rv.Longest = len(rv.Multzapfen[7].String())
 	if rv.Longest == 0 {
 		rv.Longest = 1
 	}
@@ -258,9 +271,9 @@ func ZapfenRechnung(zapfenzahl int) (rv Zapfen) {
 	// perform eight divisions, starting to divide the last product of the preceding calculation with "2".
 	// The end result will be calling zapfenzahl
 	for i := 2; i < 10; i++ {
-		rv.Divzapfen[i-2] = zapfenzahl / i
+	  	rv.Divzapfen[i-2] = new (big.Int)
+		rv.Divzapfen[i-2].Div(zapfenzahl, big.NewInt(int64(i)))
 		zapfenzahl = rv.Divzapfen[i-2]
 	}
-
 	return
 }
