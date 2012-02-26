@@ -37,7 +37,7 @@ Features
 * Division: Arbitrary precision mathematics
 * Division: Negative numbers & fractional numbers supported when deviding the pen & paper method
 * Division: Intermediate steps are returned for display / control
-* ZapfenRechnung
+* ZapfenRechnung: Arbitrary precision mathematics
 
 Installation
 ------------

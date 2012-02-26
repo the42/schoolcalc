@@ -32,7 +32,7 @@ func printdivresult(sd *schoolcalc.SDivide, err error) {
 		}
 		for _, elm := range sd.DivisionSteps {
 			blank = strings.Repeat(" ", elm.Indent)
-			fmt.Printf("%*s\n", blank, elm.Iremainder)
+			fmt.Printf("%s%s\n", blank, elm.Iremainder)
 		}
 	} else {
 		fmt.Printf("%s", err)
