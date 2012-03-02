@@ -9,13 +9,6 @@ A library for
 Supports negative numerals.
 * Zapfenrechnung. A Zapfenrechnung (Zapfen rechnen) looks like this:
 
-Stand-alone program
-
-* sdivcon: Console program which accepts input from stdin like dividend:divisor and writes the results
-  to stdout, displaying the intermediate steps when dividing the pen and paper method
-* webzapfen: Web app to display a Zapfenrechnung, including the intermediate division steps 
-
-
 <pre><code>         27 * 2 = 54
          54 * 3 = 162
         162 * 4 = 648
@@ -45,18 +38,7 @@ Installation
 ------------
 
 Library:
-
-    go get github.com/the42/schoolcalc/schoolcalc
-
-Programs:
-
-Command line program sdivcon to display the intermediate results of SchoolDivide:
-
-      go get github.com/the42/schoolcalc/sdivcon
-
-Web application webzapfen displays a Zapfenrechnung, including the intermediate division steps 
-
-      go get github.com/the42/schoolcalc/webzapfen
+  go get github.com/the42/schoolcalc/schoolcalc
 
 Usage
 -----
@@ -76,4 +58,4 @@ Testing
 
 To run the tests:
 
-  go test github.com/the42/schoolcalc
+  go test github.com/the42/schoolcalc/schoolcalc
