@@ -1,3 +1,10 @@
+// Copyright 2011, 2012  Johann Höchtl. All rights reserved.
+// Use of this source code is governed by a Modified BSD License
+// that can be found in the LICENSE file.
+
+// This command reads input from stdin in the form of dividend:dvisor
+// and displays the intermediate division steps. It is useful to check
+// pen and paper calculations from pupils who learn to divide.
 package main
 
 import (

@@ -1,3 +1,9 @@
+// Copyright 2012  Johann Höchtl. All rights reserved.
+// Use of this source code is governed by a Modified BSD License
+// that can be found in the LICENSE file.
+
+// This command implements a web server which serves Zapfenrechnung
+// and displays intermediate division steps 
 package main
 
 import (
