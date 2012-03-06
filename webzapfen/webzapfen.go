@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -104,39 +105,27 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// gzip-compression of the output of the given webhandler
-	// The flow is as follows: The webhandler writes into a buffer. If compression is supported
-	// (browser sends Accept-Encoding: gzip), the responsewriter gets pipped through a gzip-Writer
-	// As the webhandler returns, the buffer is written to the outputstream,
-	// which is either the responsehandler, or the gzip-Writer
-	// Normal: bytes.Buffer --> http.ResponseWriter
-	// Compression: bytes.Buffer --> gzip.Writer --> http.ResponseWriter
-	var outputstream io.Writer
-	var gzwriter io.WriteCloser
-	var docompress bool
-	if wh.compress && strings.Contains(req.Header.Get("Accept-Encoding"), "gzip") {
-		docompress = true
-		gzwriter = gzip.NewWriter(w)
-		outputstream = gzwriter
-	} else {
-		outputstream = w
-	}
-
 	buf := new(bytes.Buffer)
 	if err := wh.handler(buf, req, language); err != nil {
 		fmt.Fprint(buf, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	// Only necessary when doing gzip-compression, otherwise already set to the correct content-type of the actual payload
-	// I we do not set the content type here, the encoding is delivered as content-type application/x-gzip and causes the browser
-	// to download the content instead of displaying 
-	if docompress {
+	// gzip-compression of the output of the given webhandler
+	if wh.compress && strings.Contains(req.Header.Get("Accept-Encoding"), "gzip") {
+		gzbuf := new(bytes.Buffer)
+		gzwriter := gzip.NewWriter(gzbuf)
 		defer gzwriter.Close() // Otherwise the content won't get flushed to the output stream
+
 		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes()))
+		w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes())) // We have to set the content type, otherwise the ResponseWriter will guess it's application/x-gzip
+		gzwriter.Write(buf.Bytes())
+
+		buf = gzbuf
 	}
-	buf.WriteTo(outputstream)
+	// Prevent chunking of result
+	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+	buf.WriteTo(w)
 }
 
 func main() {
