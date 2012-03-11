@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/the42/schoolcalc"
 	"html/template"
 	"io"
 	"net/http"
@@ -33,7 +34,24 @@ type webhandler struct {
 }
 
 func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
-	_, err = fmt.Fprint(w, "In Zapfen")
+
+	dividend := req.URL.Query().Get("dividend")
+	divisor := req.URL.Query().Get("divisor")
+	prec := 0
+
+	if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
+		return
+	}
+
+	var result *schoolcalc.SDivide
+	if result, err = schoolcalc.SchoolDivide(dividend, divisor, uint8(prec)); err != nil {
+	return
+	}
+
+	fmt.Fprint(w, "<html><head></head><body><pre>")
+	fmt.Fprint(w, result)
+	fmt.Fprint(w, "</pre></body></html>")
+	// _, err = fmt.Fprint(w, "In Zapfen")
 	return
 }
 
@@ -115,11 +133,12 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if wh.compress && strings.Contains(req.Header.Get("Accept-Encoding"), "gzip") {
 		gzbuf := new(bytes.Buffer)
 		gzwriter := gzip.NewWriter(gzbuf)
-		defer gzwriter.Close() // Otherwise the content won't get flushed to the output stream
+		
 
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes())) // We have to set the content type, otherwise the ResponseWriter will guess it's application/x-gzip
 		gzwriter.Write(buf.Bytes())
+		gzwriter.Close() // Otherwise the content won't get flushed to the output stream
 
 		buf = gzbuf
 	}
