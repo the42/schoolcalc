@@ -14,18 +14,24 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
 
 const (
 	roottplfilename  = "index.tpl"
+	zapfenfilename   = "zapfen.tpl"
 	defaultlang      = "en"
 	cookie_lang      = "uilang"
-	rootdomain       = "webzapfen.hoechtl.at"
-	applicationport  = ":1112"
 	setlanguageparam = "setlanguage"
 	redirectparam    = "redirect"
+)
+
+var (
+	rootdomain      = conf_rootdomain()
+	applicationport = conf_binding()
+	languages       = conf_languages()
 )
 
 type webhandler struct {
@@ -35,23 +41,38 @@ type webhandler struct {
 
 func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
 
+	var errormessage []string
 	dividend := req.URL.Query().Get("dividend")
 	divisor := req.URL.Query().Get("divisor")
 	prec := 0
+	var tpl *template.Template
 
-	if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
-		return
+	if len(dividend)+len(divisor) > 2 {
+		if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
+			errormessage = append(errormessage, fmt.Sprint(err))
+		}
+		var result *schoolcalc.SDivide
+		if result, err = schoolcalc.SchoolDivide(dividend, divisor, uint8(prec)); err != nil {
+			errormessage = append(errormessage, fmt.Sprint(err))
+
+		}
+
+		_ = result
+	}
+	var retry bool
+retry:
+	tpl, err = template.ParseFiles(lang + "." + zapfenfilename)
+	if err != nil {
+		if _, ok := err.(*os.PathError); ok && !retry {
+			retry = true
+			lang = defaultlang
+			goto retry
+		} else {
+			panic(err)
+		}
 	}
 
-	var result *schoolcalc.SDivide
-	if result, err = schoolcalc.SchoolDivide(dividend, divisor, uint8(prec)); err != nil {
-	return
-	}
-
-	fmt.Fprint(w, "<html><head></head><body><pre>")
-	fmt.Fprint(w, result)
-	fmt.Fprint(w, "</pre></body></html>")
-	// _, err = fmt.Fprint(w, "In Zapfen")
+	err = tpl.Execute(w, nil)
 	return
 }
 
@@ -65,6 +86,16 @@ func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
 	}
 	err = tpl.Execute(w, nil)
 	return
+}
+
+func validlanguage(language string) bool {
+	// if the language was specified as a paramter, we have to set a cookie	
+	for _, lang := range languages {
+		if lang == language {
+			return true
+		}
+	}
+	return false
 }
 
 // ServeHTTP installs a catch-all error recovery for the specific handler functions
@@ -83,8 +114,11 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// set the language according to the request parameter.
 	if language = req.URL.Query().Get(setlanguageparam); language != "" {
-		// if the language was specified as a paramter, we have to set a cookie	
-		setcookie = true
+		if validlanguage(language) {
+			setcookie = true
+		} else {
+			panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, languages))
+		}
 	} else {
 		language = defaultlang
 	}
@@ -97,6 +131,8 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.SetCookie(w, langCookie)
 		// We set the cookie and redirect to the language subdomain
 		mustredirect = true
+	} else if !validlanguage(language) {
+		panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, languages))
 	} else if err != nil {
 		panic(err)
 	}
@@ -133,7 +169,6 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if wh.compress && strings.Contains(req.Header.Get("Accept-Encoding"), "gzip") {
 		gzbuf := new(bytes.Buffer)
 		gzwriter := gzip.NewWriter(gzbuf)
-		
 
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes())) // We have to set the content type, otherwise the ResponseWriter will guess it's application/x-gzip

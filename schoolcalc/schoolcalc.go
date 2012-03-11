@@ -184,12 +184,11 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 		Negative:      negative}, nil
 }
 
-
 func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, outputdivided string) bool {
 	return inputdividend == outputdivided && inputdivisor == outputdivisor
 }
 
-func (sd *SDivide) String () string {
+func (sd *SDivide) String() string {
 	var blank string
 	sresult := fmt.Sprintf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
 	if !inputSDivisequaltoResultSDiv(sd.Dividend, sd.Divisor, sd.NormalizedDividend, sd.NormalizedDivisor) {
