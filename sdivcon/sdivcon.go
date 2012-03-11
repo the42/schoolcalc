@@ -26,27 +26,6 @@ func normalizeSDivInput(s string) (out string) {
 	return
 }
 
-func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, outputdivided string) bool {
-	return inputdividend == outputdivided && inputdivisor == outputdivisor
-}
-
-func printdivresult(sd *schoolcalc.SDivide, err error) {
-	var blank string
-	if err == nil {
-		fmt.Printf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
-		if !inputSDivisequaltoResultSDiv(sd.Dividend, sd.Divisor, sd.NormalizedDividend, sd.NormalizedDivisor) {
-			fmt.Printf("%s : %s = %s\n", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
-		}
-		for _, elm := range sd.DivisionSteps {
-			blank = strings.Repeat(" ", elm.Indent)
-			fmt.Printf("%s%s\n", blank, elm.Iremainder)
-		}
-	} else {
-		fmt.Printf("%s", err)
-	}
-	fmt.Printf("\n")
-}
-
 func main() {
 
 	var lines int
@@ -75,7 +54,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "sdivcon %d: not a valid divisor:dividend (ignoring)\n", lines)
 			continue
 		}
-
-		printdivresult(schoolcalc.SchoolDivide(splitstrings[0], splitstrings[1], schoolcalc.SDivPrecReached|2))
+		result, _ := schoolcalc.SchoolDivide(splitstrings[0], splitstrings[1], schoolcalc.SDivPrecReached|2)
+		fmt.Fprint(os.Stdout, result)
+		fmt.Fprintln(os.Stdout)
 	}
 }

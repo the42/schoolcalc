@@ -184,6 +184,24 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 		Negative:      negative}, nil
 }
 
+
+func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, outputdivided string) bool {
+	return inputdividend == outputdivided && inputdivisor == outputdivisor
+}
+
+func (sd *SDivide) String () string {
+	var blank string
+	sresult := fmt.Sprintf("%s : %s = %s\n", sd.Dividend, sd.Divisor, sd.Result)
+	if !inputSDivisequaltoResultSDiv(sd.Dividend, sd.Divisor, sd.NormalizedDividend, sd.NormalizedDivisor) {
+		sresult += fmt.Sprintf("%s : %s = %s\n", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
+	}
+	for _, elm := range sd.DivisionSteps {
+		blank = strings.Repeat(" ", elm.Indent)
+		sresult += fmt.Sprintf("%s%s\n", blank, elm.Iremainder)
+	}
+	return sresult
+}
+
 // A 'Zapfen' consists of 8 multiplications and 8 divisions.
 // Example:
 //
