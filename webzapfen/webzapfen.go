@@ -17,10 +17,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"math/big"
 )
 
 const (
 	roottplfilename  = "index.tpl"
+	divisionfilename   = "division.tpl"
 	zapfenfilename   = "zapfen.tpl"
 	defaultlang      = "en"
 	cookie_lang      = "uilang"
@@ -39,26 +41,61 @@ type webhandler struct {
 	compress bool
 }
 
-func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
+type divisionPage struct {
+  Error []string
+  Dividend, Divisor string
+  Intermediate string
+}
 
-	var errormessage []string
+func divisionHandler(w io.Writer, req *http.Request, lang string) (err error) {
+
 	dividend := req.URL.Query().Get("dividend")
 	divisor := req.URL.Query().Get("divisor")
+	page := &divisionPage{Dividend: dividend, Divisor: divisor}
 	prec := 0
-	var tpl *template.Template
 
-	if len(dividend)+len(divisor) > 2 {
+	var tpl *template.Template
+	var retry bool
+retry:
+	tpl, err = template.ParseFiles(lang + "." + divisionfilename)
+	if err != nil {
+		if _, ok := err.(*os.PathError); ok && !retry {
+			retry = true
+			lang = defaultlang
+			goto retry
+		} else {
+			panic(err)
+		}
+	}
+
+	if len(dividend)+len(divisor) >= 2 {
 		if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
-			errormessage = append(errormessage, fmt.Sprint(err))
+			page.Error = append(page.Error, fmt.Sprint(err))
 		}
 		var result *schoolcalc.SDivide
 		if result, err = schoolcalc.SchoolDivide(dividend, divisor, uint8(prec)); err != nil {
-			errormessage = append(errormessage, fmt.Sprint(err))
-
+			page.Error = append(page.Error, fmt.Sprint(err))
+		} else {
+		page.Intermediate = fmt.Sprint(result)
 		}
-
-		_ = result
 	}
+
+	err = tpl.Execute(w, page)
+	return
+}
+
+type zapfenPage struct {
+  Error []string
+  Number string
+  Intermediate string
+}
+
+func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
+
+  number := req.URL.Query().Get("number")
+	page := &zapfenPage{Number: number}
+
+	var tpl *template.Template
 	var retry bool
 retry:
 	tpl, err = template.ParseFiles(lang + "." + zapfenfilename)
@@ -72,7 +109,16 @@ retry:
 		}
 	}
 
-	err = tpl.Execute(w, nil)
+	if len(number) >= 1 {
+		if num, ok := big.NewInt(0).SetString(number, 10); ok {
+		  		result := schoolcalc.ZapfenRechnung(num)
+		page.Intermediate = fmt.Sprint(result)
+		} else {
+		  page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", number))
+		}
+	}
+
+	err = tpl.Execute(w, page)
 	return
 }
 
@@ -184,6 +230,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.Handle("/", &webhandler{rootHandler, true})
+	http.Handle("/division/", &webhandler{divisionHandler, true})
 	http.Handle("/zapfen/", &webhandler{zapfenHandler, true})
 	http.ListenAndServe(applicationport, nil)
 }
