@@ -270,7 +270,7 @@ type Zapfen struct {
 }
 
 func ZapfenRechnung(zapfenzahl *big.Int) (rv *Zapfen) {
-  rv = &Zapfen{Zapfenzahl: zapfenzahl}
+	rv = &Zapfen{Zapfenzahl: zapfenzahl}
 
 	// eight multiplications, starting with "2"
 	for i := 2; i < 10; i++ {
@@ -296,17 +296,17 @@ func ZapfenRechnung(zapfenzahl *big.Int) (rv *Zapfen) {
 }
 
 func (rv *Zapfen) String() string {
-  var sresult string
-    	input := rv.Zapfenzahl
-    	for i := 2; i < 10; i++ {
-    		sresult += fmt.Sprintf("%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
-    		input = rv.Multzapfen[i-2]
-    	}
-    
-    	for i := 2; i < 10; i++ {
-    		sresult += fmt.Sprintf("%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
-    		input = rv.Divzapfen[i-2]
+	var sresult string
+	input := rv.Zapfenzahl
+	for i := 2; i < 10; i++ {
+		sresult += fmt.Sprintf("%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
+		input = rv.Multzapfen[i-2]
+	}
+
+	for i := 2; i < 10; i++ {
+		sresult += fmt.Sprintf("%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
+		input = rv.Divzapfen[i-2]
 
 	}
-	    return sresult
-    }
+	return sresult
+}
