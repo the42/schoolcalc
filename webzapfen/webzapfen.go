@@ -13,16 +13,16 @@ import (
 	"github.com/the42/schoolcalc"
 	"html/template"
 	"io"
+	"math/big"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"math/big"
 )
 
 const (
 	roottplfilename  = "index.tpl"
-	divisionfilename   = "division.tpl"
+	divisionfilename = "division.tpl"
 	zapfenfilename   = "zapfen.tpl"
 	defaultlang      = "en"
 	cookie_lang      = "uilang"
@@ -42,9 +42,9 @@ type webhandler struct {
 }
 
 type divisionPage struct {
-  Error []string
-  Dividend, Divisor string
-  Intermediate string
+	Error             []string
+	Dividend, Divisor string
+	Intermediate      string
 }
 
 func divisionHandler(w io.Writer, req *http.Request, lang string) (err error) {
@@ -53,11 +53,9 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) (err error) {
 	divisor := req.URL.Query().Get("divisor")
 	page := &divisionPage{Dividend: dividend, Divisor: divisor}
 	prec := 0
-
-	var tpl *template.Template
-	var retry bool
+	retry := false
 retry:
-	tpl, err = template.ParseFiles(lang + "." + divisionfilename)
+	tpl, err := template.ParseFiles(lang + "." + divisionfilename)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok && !retry {
 			retry = true
@@ -72,11 +70,11 @@ retry:
 		if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
 			page.Error = append(page.Error, fmt.Sprint(err))
 		}
-		var result *schoolcalc.SDivide
-		if result, err = schoolcalc.SchoolDivide(dividend, divisor, uint8(prec)); err != nil {
+		result, err := schoolcalc.SchoolDivide(dividend, divisor, uint8(prec))
+		if err != nil {
 			page.Error = append(page.Error, fmt.Sprint(err))
 		} else {
-		page.Intermediate = fmt.Sprint(result)
+			page.Intermediate = fmt.Sprint(result)
 		}
 	}
 
@@ -85,20 +83,19 @@ retry:
 }
 
 type zapfenPage struct {
-  Error []string
-  Number string
-  Intermediate string
+	Error        []string
+	Number       string
+	Intermediate string
 }
 
 func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
 
-  number := req.URL.Query().Get("number")
+	number := req.URL.Query().Get("number")
 	page := &zapfenPage{Number: number}
+	retry := false
 
-	var tpl *template.Template
-	var retry bool
 retry:
-	tpl, err = template.ParseFiles(lang + "." + zapfenfilename)
+	tpl, err := template.ParseFiles(lang + "." + zapfenfilename)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok && !retry {
 			retry = true
@@ -111,10 +108,10 @@ retry:
 
 	if len(number) >= 1 {
 		if num, ok := big.NewInt(0).SetString(number, 10); ok {
-		  		result := schoolcalc.ZapfenRechnung(num)
-		page.Intermediate = fmt.Sprint(result)
+			result := schoolcalc.ZapfenRechnung(num)
+			page.Intermediate = fmt.Sprint(result)
 		} else {
-		  page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", number))
+			page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", number))
 		}
 	}
 
