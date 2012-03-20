@@ -119,7 +119,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 	// start to divide as soon as the dividend is greater than the divisor
 	for dividendep = 1; ; dividendep++ {
 		if _, ok = bigintermediatedividend.SetString(mydividend[0:dividendep], 10); !ok {
-			return nil, fmt.Errorf("Not a dividend: \"%s\"", mydividend[0:dividendep])
+			return nil, fmt.Errorf("Not a dividend: \"%s\"", dividend)
 		}
 
 		// We are done checking once the running dividend is bigger than the divisor or if it can't get bigger because dividend < divisor
@@ -168,6 +168,14 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 			}
 			runningprec++
 		} else {
+			finalremainder := bigintermediatedividend.String()
+			finalremainder = finalremainder[:len(finalremainder)-1]
+			if finalremainder == "" {
+				finalremainder = "0"
+			}
+			onestep.Iremainder = finalremainder
+			onestep.Indent = dividendep + int(runningprec) - len(onestep.Iremainder)
+			steps = append(steps, onestep)
 			break
 		}
 	}
@@ -221,44 +229,7 @@ func (sd *SDivide) String() string {
 //       1944 / 8 = 243
 //        243 / 9 = 27
 //
-// Sample program:
-//    package main
-//    
-//    import (
-//    	"fmt"
-//    	"math/big"
-//    	"os"
-//    )
-//    
-//    func main() {
-//    
-//    	var strzapfenzahl string
-//    	_, err := fmt.Fscanf(os.Stdin, "%s", &strzapfenzahl)
-//    
-//    	if err != nil {
-//    		panic(err)
-//    	}
-//    
-//    	zapfenzahl, succ := big.NewInt(0).SetString(strzapfenzahl, 0)
-//    	if !succ {
-//    		panic(fmt.Sprintf("not a number :%s", strzapfenzahl))
-//    	}
-//    
-//    	rv := ZapfenRechnung(zapfenzahl)
-//    
-//    	fmt.Print(zapfenzahl)
-//    
-//    	input := rv.Zapfenzahl
-//    	for i := 2; i < 10; i++ {
-//    		fmt.Fprintf(os.Stdout, "%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
-//    		input = rv.Multzapfen[i-2]
-//    	}
-//    
-//    	for i := 2; i < 10; i++ {
-//    		fmt.Fprintf(os.Stdout, "%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
-//    		input = rv.Divzapfen[i-2]
-//    	}
-//    }
+
 
 // The struct stores the eight intermediary multiplications, the eight divisions and
 // the string length of the longest product to allow proper result formatting.
