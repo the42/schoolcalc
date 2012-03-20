@@ -31,6 +31,7 @@ const (
 )
 
 var (
+	roottemplatedir = conf_roottemplatedir()
 	rootdomain      = conf_rootdomain()
 	applicationport = conf_binding()
 	languages       = conf_languages()
@@ -42,20 +43,34 @@ type webhandler struct {
 }
 
 type divisionPage struct {
-	Error             []string
-	Dividend, Divisor string
-	Intermediate      string
+	Dividend, Divisor, Precision string
+	Intermediate                 string
+	Error                        []string
+	StopRemz                     bool
 }
 
-func divisionHandler(w io.Writer, req *http.Request, lang string) (err error) {
+func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
+	prec := 0
 	dividend := req.URL.Query().Get("dividend")
 	divisor := req.URL.Query().Get("divisor")
 	page := &divisionPage{Dividend: dividend, Divisor: divisor}
-	prec := 0
+
+	page.Precision = req.URL.Query().Get("prec")
+	stopremzs := req.URL.Query().Get("stopremz")
+	if len(stopremzs) > 0 {
+		stopremz, err := strconv.ParseBool(stopremzs)
+		if err != nil {
+			page.StopRemz = true
+			page.Error = append(page.Error, fmt.Sprintf("Parameter 'stopremz' tainted: %s", err))
+		} else {
+			page.StopRemz = stopremz
+		}
+	}
+
 	retry := false
 retry:
-	tpl, err := template.ParseFiles(lang + "." + divisionfilename)
+	tpl, err := template.ParseFiles(roottemplatedir + lang + "." + divisionfilename)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok && !retry {
 			retry = true
@@ -66,20 +81,32 @@ retry:
 		}
 	}
 
-	if len(dividend)+len(divisor) >= 2 {
-		if prec, err = strconv.Atoi(req.URL.Query().Get("prec")); err != nil {
-			page.Error = append(page.Error, fmt.Sprint(err))
-		}
-		result, err := schoolcalc.SchoolDivide(dividend, divisor, uint8(prec))
-		if err != nil {
-			page.Error = append(page.Error, fmt.Sprint(err))
-		} else {
-			page.Intermediate = fmt.Sprint(result)
-		}
-	}
+	func() {
+		defer func() { // want to handle division by zero
+			if err := recover(); err != nil {
+				page.Error = append(page.Error, fmt.Sprint(err))
+			}
+		}()
 
-	err = tpl.Execute(w, page)
-	return
+		if len(page.Precision) > 0 {
+			if prec, err = strconv.Atoi(page.Precision); err != nil {
+				page.Error = append(page.Error, fmt.Sprint(err))
+			}
+		}
+		if len(dividend) > 0 || len(divisor) > 0 {
+			if page.StopRemz {
+				prec = int(schoolcalc.SDivPrecReached | uint8(prec))
+			}
+			result, err := schoolcalc.SchoolDivide(dividend, divisor, uint8(prec))
+			if err != nil {
+				page.Error = append(page.Error, fmt.Sprint(err))
+			} else {
+				page.Intermediate = fmt.Sprint(result)
+			}
+		}
+	}()
+
+	return tpl.Execute(w, page)
 }
 
 type zapfenPage struct {
@@ -88,14 +115,14 @@ type zapfenPage struct {
 	Intermediate string
 }
 
-func zapfenHandler(w io.Writer, req *http.Request, lang string) (err error) {
+func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 
 	number := req.URL.Query().Get("number")
 	page := &zapfenPage{Number: number}
 	retry := false
 
 retry:
-	tpl, err := template.ParseFiles(lang + "." + zapfenfilename)
+	tpl, err := template.ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok && !retry {
 			retry = true
@@ -115,8 +142,7 @@ retry:
 		}
 	}
 
-	err = tpl.Execute(w, page)
-	return
+	return tpl.Execute(w, page)
 }
 
 func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
@@ -203,9 +229,10 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	buf := new(bytes.Buffer)
+
 	if err := wh.handler(buf, req, language); err != nil {
-		fmt.Fprint(buf, err)
-		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+
 	}
 
 	// gzip-compression of the output of the given webhandler

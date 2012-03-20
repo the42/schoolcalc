@@ -230,7 +230,6 @@ func (sd *SDivide) String() string {
 //        243 / 9 = 27
 //
 
-
 // The struct stores the eight intermediary multiplications, the eight divisions and
 // the string length of the longest product to allow proper result formatting.
 type Zapfen struct {
