@@ -18,12 +18,13 @@ import (
 var configFileName = flag.String("config", "config.json", "location of JSON configuration file")
 
 type config struct {
-	RootDomain string
-	Binding    string
-	Languages  []string
+	RootDomain      string
+	Binding         string
+	RootTemplateDir string
+	Languages       []string
 }
 
-var conf = &config{RootDomain: "webzapfen.hoechtl.at", Binding: ":1112", Languages: []string{"de", "en"}}
+var conf = &config{RootDomain: "webzapfen.hoechtl.at", Binding: ":1112", Languages: []string{"de", "en"}, RootTemplateDir: "./templates/"}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
@@ -60,4 +61,10 @@ func conf_binding() string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
 	return conf.Binding
+}
+
+func conf_roottemplatedir() string {
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	return conf.RootTemplateDir
 }
