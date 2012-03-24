@@ -47,10 +47,10 @@ type divisionPage struct {
 	Intermediate                 *schoolcalc.SDivide
 	IntermediateStr              string
 	Error                        []string
-	StopRemz                     bool
+	StopRemz, Boxed              bool
 }
 
-func tplfuncdivdisplay(sd *schoolcalc.SDivide) template.HTML {
+func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) template.HTML {
 	if sd != nil {
 		dividendivisorresult := fmt.Sprintf("%s:%s=%s", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
 		var column, htmlResult template.HTML
@@ -68,9 +68,9 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide) template.HTML {
 		for i := 0; i < runlen; i++ {
 
 			if i < lastdivColumn {
-				column = template.HTML(`<div class="divisionColumn">`)
+				column = template.HTML(fmt.Sprintf(`<div class="divisionColumn" division="true" boxed="%t">`, boxed))
 			} else {
-				column = template.HTML(`<div class="resultColumn">`)
+				column = template.HTML(`<div class="divisionColumn" result="true">`)
 			}
 
 			if i < len(dividendivisorresult) {
@@ -99,20 +99,30 @@ var templdivfuncMap = template.FuncMap{
 
 func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
-	prec := 0
 	dividend := req.URL.Query().Get("dividend")
 	divisor := req.URL.Query().Get("divisor")
-	page := &divisionPage{Dividend: dividend, Divisor: divisor}
+	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true}
 
+	prec := 0
 	page.Precision = req.URL.Query().Get("prec")
+
 	stopremzs := req.URL.Query().Get("stopremz")
 	if len(stopremzs) > 0 {
 		stopremz, err := strconv.ParseBool(stopremzs)
 		if err != nil {
-			page.StopRemz = true
 			page.Error = append(page.Error, fmt.Sprintf("Parameter 'stopremz' tainted: %s", err))
 		} else {
 			page.StopRemz = stopremz
+		}
+	}
+
+	boxes := req.URL.Query().Get("boxed")
+	if len(boxes) > 0 {
+		boxed, err := strconv.ParseBool(boxes)
+		if err != nil {
+			page.Error = append(page.Error, fmt.Sprintf("Parameter 'boxed' tainted: %s", err))
+		} else {
+			page.Boxed = boxed
 		}
 	}
 
