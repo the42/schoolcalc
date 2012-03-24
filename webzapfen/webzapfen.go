@@ -44,9 +44,57 @@ type webhandler struct {
 
 type divisionPage struct {
 	Dividend, Divisor, Precision string
-	Intermediate                 string
+	Intermediate                 *schoolcalc.SDivide
+	IntermediateStr              string
 	Error                        []string
 	StopRemz                     bool
+}
+
+func tplfuncdivdisplay(sd *schoolcalc.SDivide) template.HTML {
+	if sd != nil {
+		dividendivisorresult := fmt.Sprintf("%s:%s=%s", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
+		var column, htmlResult template.HTML
+		var runlen int
+
+		if len(dividendivisorresult) > int(sd.ActualPrec) {
+			runlen = len(dividendivisorresult)
+		} else {
+			runlen = int(sd.ActualPrec)
+		}
+
+		lastIntermediate := sd.DivisionSteps[len(sd.DivisionSteps)-1]
+		lastdivColumn := lastIntermediate.Indent + len(lastIntermediate.Iremainder)
+
+		for i := 0; i < runlen; i++ {
+
+			if i < lastdivColumn {
+				column = template.HTML(`<div class="divisionColumn">`)
+			} else {
+				column = template.HTML(`<div class="resultColumn">`)
+			}
+
+			if i < len(dividendivisorresult) {
+				column += template.HTML(dividendivisorresult[i]) + "<br />"
+			} else {
+				column += "<br />"
+			}
+
+			for _, elm := range sd.DivisionSteps {
+				if i >= elm.Indent && i < elm.Indent+len(elm.Iremainder) {
+					column += template.HTML(elm.Iremainder[i-elm.Indent]) + "<br />"
+				} else {
+					column += "<br />"
+				}
+			}
+			htmlResult += column + "</div>\n"
+		}
+		return htmlResult
+	}
+	return ""
+}
+
+var templdivfuncMap = template.FuncMap{
+	"tplfuncdivdisplay": tplfuncdivdisplay,
 }
 
 func divisionHandler(w io.Writer, req *http.Request, lang string) error {
@@ -70,7 +118,7 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
 	retry := false
 retry:
-	tpl, err := template.ParseFiles(roottemplatedir + lang + "." + divisionfilename)
+	tpl, err := template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
 	if err != nil {
 		if _, ok := err.(*os.PathError); ok && !retry {
 			retry = true
@@ -101,7 +149,8 @@ retry:
 			if err != nil {
 				page.Error = append(page.Error, fmt.Sprint(err))
 			} else {
-				page.Intermediate = fmt.Sprint(result)
+				page.Intermediate = result
+				page.IntermediateStr = fmt.Sprint(result)
 			}
 		}
 	}()
