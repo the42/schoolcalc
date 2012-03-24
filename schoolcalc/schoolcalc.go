@@ -29,10 +29,10 @@ type SDivide struct {
 	Dividend, Divisor,
 	NormalizedDividend, NormalizedDivisor,
 	Result, Remainder string
-	DivisionSteps []Iremainder
-	Prec          uint8
-	Exact         bool
-	Negative      bool
+	DivisionSteps    []Iremainder
+	Prec, ActualPrec uint8
+	Exact            bool
+	Negative         bool
 }
 
 // SchoolDivide accepts two strings and will return the result and intermediate remainders.
@@ -187,9 +187,9 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 	return &SDivide{Dividend: dividend, Divisor: divisor, Result: endresult, Remainder: bigintermediatedividend.String(),
 		NormalizedDividend: mydividend, NormalizedDivisor: mydivisor,
 		DivisionSteps: steps,
-		Prec:          prec,
-		Exact:         exact,
-		Negative:      negative}, nil
+		Prec:          prec, ActualPrec: runningprec,
+		Exact:    exact,
+		Negative: negative}, nil
 }
 
 func inputSDivisequaltoResultSDiv(inputdivisor, inputdividend, outputdivisor, outputdivided string) bool {
