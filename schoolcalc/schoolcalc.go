@@ -162,7 +162,6 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 			if bigintermediatedividend.Cmp(big.NewInt(0)) == 0 && (prec&SDivPrecReached) > 0 {
 				exact = true
 
-				onestep.Iremainder = bigintermediatedividend.String()
 				onestep.Indent = dividendep + int(runningprec) - len(onestep.Iremainder)
 				steps = append(steps, onestep)
 
@@ -182,13 +181,7 @@ func SchoolDivide(dividend, divisor string, prec uint8) (sd *SDivide, err error)
 			}
 			runningprec++
 		} else {
-			onestep.Iremainder = bigintermediatedividend.String()
-			if len(onestep.Iremainder) > 0 {
-				onestep.Iremainder = onestep.Iremainder[:len(onestep.Iremainder)-1]
-			}
-			if onestep.Iremainder == "" {
-				onestep.Iremainder = "0"
-			}
+			onestep.Iremainder = bigintermediatedividend.Div(bigintermediatedividend, big.NewInt(10)).String()
 			onestep.Indent = dividendep + int(runningprec) - len(onestep.Iremainder)
 			steps = append(steps, onestep)
 			break
