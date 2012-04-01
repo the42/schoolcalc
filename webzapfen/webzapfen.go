@@ -68,9 +68,9 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) template.HTML {
 		for i := 0; i < runlen; i++ {
 
 			if i < lastdivColumn {
-				column = template.HTML(fmt.Sprintf(`<div class="divisionColumn" division="true" boxed="%t">`, boxed))
+				column = template.HTML(fmt.Sprintf(`<div class="divisionColumn" data-division="true" data-boxed="%t">`, boxed))
 			} else {
-				column = template.HTML(`<div class="divisionColumn" result="true">`)
+				column = template.HTML(`<div class="divisionColumn" data-result="true">`)
 			}
 
 			if i < len(dividendivisorresult) {
@@ -217,7 +217,6 @@ func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
 }
 
 func validlanguage(language string) bool {
-	// if the language was specified as a paramter, we have to set a cookie	
 	for _, lang := range languages {
 		if lang == language {
 			return true
