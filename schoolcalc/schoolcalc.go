@@ -276,14 +276,14 @@ func ZapfenRechnung(zapfenzahl *big.Int) (rv *Zapfen) {
 func (rv *Zapfen) String() string {
 	var sresult string
 	input := rv.Zapfenzahl
-	for i := 2; i < 10; i++ {
-		sresult += fmt.Sprintf("%*d * %d = %d\n", rv.Longest, input, i, rv.Multzapfen[i-2])
-		input = rv.Multzapfen[i-2]
+	for i := 0; i < 8; i++ {
+		sresult += fmt.Sprintf("%*d * %d = %d\n", rv.Longest, input, i+2, rv.Multzapfen[i])
+		input = rv.Multzapfen[i]
 	}
 
-	for i := 2; i < 10; i++ {
-		sresult += fmt.Sprintf("%*d / %d = %d\n", rv.Longest, input, i, rv.Divzapfen[i-2])
-		input = rv.Divzapfen[i-2]
+	for i := 0; i < 8; i++ {
+		sresult += fmt.Sprintf("%*d / %d = %d\n", rv.Longest, input, i+2, rv.Divzapfen[i])
+		input = rv.Divzapfen[i]
 
 	}
 	return sresult
