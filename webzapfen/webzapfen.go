@@ -44,9 +44,9 @@ type webhandler struct {
 
 type divisionPage struct {
 	Dividend, Divisor, Precision string
-	Intermediate                 *schoolcalc.SDivide
-	Error                        []string
-	StopRemz, Boxed              bool
+	*schoolcalc.SDivide
+	Error           []string
+	StopRemz, Boxed bool
 }
 
 func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.HTML) {
@@ -97,12 +97,15 @@ var templdivfuncMap = template.FuncMap{
 
 func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
-	dividend := req.URL.Query().Get("dividend")
-	divisor := req.URL.Query().Get("divisor")
+	var tpl *template.Template
+	var err error
+
+	dividend := strings.TrimSpace(req.URL.Query().Get("dividend"))
+	divisor := strings.TrimSpace(req.URL.Query().Get("divisor"))
 	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true}
 
 	prec := 0
-	page.Precision = req.URL.Query().Get("prec")
+	page.Precision = strings.TrimSpace(req.URL.Query().Get("prec"))
 
 	stopremzs := req.URL.Query().Get("stopremz")
 	if len(stopremzs) > 0 {
@@ -124,16 +127,14 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 		}
 	}
 
-	retry := false
-retry:
-	tpl, err := template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
-	if err != nil {
-		if _, ok := err.(*os.PathError); ok && !retry {
-			retry = true
-			lang = defaultlang
-			goto retry
-		} else {
-			panic(err)
+	for retry := 0; retry <= 1; retry++ {
+		tpl, err = template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
+		if err != nil {
+			if _, ok := err.(*os.PathError); ok && retry < 1 {
+				lang = defaultlang
+			} else {
+				panic(err)
+			}
 		}
 	}
 
@@ -145,6 +146,7 @@ retry:
 		}()
 
 		if len(page.Precision) > 0 {
+
 			if prec, err = strconv.Atoi(page.Precision); err != nil {
 				page.Error = append(page.Error, fmt.Sprint(err))
 			}
@@ -157,7 +159,7 @@ retry:
 			if err != nil {
 				page.Error = append(page.Error, fmt.Sprint(err))
 			} else {
-				page.Intermediate = result
+				page.SDivide = result
 			}
 		}
 	}()
@@ -166,35 +168,37 @@ retry:
 }
 
 type zapfenPage struct {
-	Error        []string
-	Number       string
-	Intermediate string
+	Error     []string
+	Number    string
+	ZapfenStr string
+	*schoolcalc.Zapfen
 }
 
 func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 
-	number := req.URL.Query().Get("number")
-	page := &zapfenPage{Number: number}
-	retry := false
+	var tpl *template.Template
+	var err error
 
-retry:
-	tpl, err := template.ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
-	if err != nil {
-		if _, ok := err.(*os.PathError); ok && !retry {
-			retry = true
-			lang = defaultlang
-			goto retry
-		} else {
-			panic(err)
+	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number"))}
+
+	for retry := 0; retry <= 1; retry++ {
+		tpl, err = template.ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
+		if err != nil {
+			if _, ok := err.(*os.PathError); ok && retry < 1 {
+				lang = defaultlang
+			} else {
+				panic(err)
+			}
 		}
 	}
 
-	if len(number) >= 1 {
-		if num, ok := big.NewInt(0).SetString(number, 10); ok {
+	if len(page.Number) >= 1 {
+		if num, ok := big.NewInt(0).SetString(page.Number, 10); ok {
 			result := schoolcalc.ZapfenRechnung(num)
-			page.Intermediate = fmt.Sprint(result)
+			page.ZapfenStr = fmt.Sprint(result)
+			page.Zapfen = result
 		} else {
-			page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", number))
+			page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", page.Number))
 		}
 	}
 

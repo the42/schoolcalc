@@ -38,7 +38,7 @@
     </p>
   </form>
   <div class="divisionOutputArea">
-  {{tplfuncdivdisplay .Intermediate .Boxed}}
+  {{tplfuncdivdisplay .SDivide .Boxed}}
   </div>
   <script type="text/javascript">
     function changeBox() {
