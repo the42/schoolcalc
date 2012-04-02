@@ -146,7 +146,6 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 		}()
 
 		if len(page.Precision) > 0 {
-
 			if prec, err = strconv.Atoi(page.Precision); err != nil {
 				page.Error = append(page.Error, fmt.Sprint(err))
 			}
@@ -174,6 +173,73 @@ type zapfenPage struct {
 	*schoolcalc.Zapfen
 }
 
+// Uses a cell for every digit to display the zapfen
+/*
+func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
+	var retstring string
+	if zapfen != nil {
+
+		input := zapfen.Zapfenzahl
+		inputzahlstr := input.String()
+
+		for mults := 0; mults < 8; mults++ {
+			retstring += "<tr>\n" + "  " + strings.Repeat("<td></td>", zapfen.Longest-len(inputzahlstr))
+			for _, multrune := range inputzahlstr {
+				retstring += fmt.Sprintf("<td>%c</td>", multrune)
+			}
+			retstring += fmt.Sprintf("<td>x</td><td>%d</td><td>=</td>", mults+2)
+
+			input = zapfen.Multzapfen[mults]
+			inputzahlstr = input.String()
+
+			for _, multrune := range inputzahlstr {
+				retstring += fmt.Sprintf("<td>%c</td>", multrune)
+			}
+			retstring += "\n</tr>"
+		}
+
+		for divs := 0; divs < 8; divs++ {
+			retstring += "\n<tr>\n" + "  " + strings.Repeat("<td></td>", zapfen.Longest-len(inputzahlstr))
+			for _, divrune := range inputzahlstr {
+				retstring += fmt.Sprintf("<td>%c</td>", divrune)
+			}
+			retstring += fmt.Sprintf("<td>/</td><td>%d</td><td>=</td>", divs+2)
+
+			input = zapfen.Divzapfen[divs]
+			inputzahlstr = input.String()
+
+			for _, divrune := range inputzahlstr {
+				retstring += fmt.Sprintf("<td>%c</td>", divrune)
+			}
+			retstring += "\n</tr>"
+		}
+	}
+	return template.HTML(retstring)
+}
+*/
+
+func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
+	var retstring string
+	if zapfen != nil {
+		input := zapfen.Zapfenzahl
+
+		for i := 0; i < 8; i++ {
+			retstring += fmt.Sprintf("<tr>\n<td class='zapfenmultiplier'>%s</td><td>x</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", input, i+2, zapfen.Multzapfen[i])
+			input = zapfen.Multzapfen[i]
+		}
+
+		for i := 0; i < 8; i++ {
+			retstring += fmt.Sprintf("\n<tr id='zapfendividend%d'>\n<td class='zapfendividend'>%s</td><td>/</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
+			input = zapfen.Divzapfen[i]
+		}
+	}
+	return template.HTML(retstring)
+}
+
+var templzapfenfuncMap = template.FuncMap{
+	"tplfunczapfendisplay": tplfunczapfendisplay,
+}
+
 func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 
 	var tpl *template.Template
@@ -182,7 +248,7 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number"))}
 
 	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
+		tpl, err = template.New("ZapfenTemplate").Funcs(templzapfenfuncMap).ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
 		if err != nil {
 			if _, ok := err.(*os.PathError); ok && retry < 1 {
 				lang = defaultlang
