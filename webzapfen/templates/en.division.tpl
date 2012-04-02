@@ -36,10 +36,10 @@
       Continue calculating until precision, even if remainder is already zero <input type="checkbox" id="submitprec" name="stopremz" value="false"{{if not .StopRemz}} checked="checked"{{end}}/>
       Display boxes are off <input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/>
     </p>
-  </form>
+  </form>{{if .SDivide}}
   <div class="divisionOutputArea">
   {{tplfuncdivdisplay .SDivide .Boxed}}
-  </div>
+  </div>{{end}}
   <script type="text/javascript">
     function changeBox() {
       var items = document.getElementsByClassName('divisionColumn');
