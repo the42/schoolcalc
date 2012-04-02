@@ -37,10 +37,9 @@
       Display boxes are off <input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/>
     </p>
   </form>
-  <pre>
-{{.IntermediateStr}}
-  </pre>
+  <div class="divisionOutputArea">
   {{tplfuncdivdisplay .Intermediate .Boxed}}
+  </div>
   <script type="text/javascript">
     function changeBox() {
       var items = document.getElementsByClassName('divisionColumn');

@@ -45,15 +45,14 @@ type webhandler struct {
 type divisionPage struct {
 	Dividend, Divisor, Precision string
 	Intermediate                 *schoolcalc.SDivide
-	IntermediateStr              string
 	Error                        []string
 	StopRemz, Boxed              bool
 }
 
-func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) template.HTML {
+func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.HTML) {
 	if sd != nil {
 		dividendivisorresult := fmt.Sprintf("%s:%s=%s", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
-		var column, htmlResult template.HTML
+		var column template.HTML
 		var runlen int
 
 		if len(dividendivisorresult) > int(sd.ActualPrec) {
@@ -88,9 +87,8 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) template.HTML {
 			}
 			htmlResult += column + "</div>\n"
 		}
-		return htmlResult
 	}
-	return ""
+	return
 }
 
 var templdivfuncMap = template.FuncMap{
@@ -160,7 +158,6 @@ retry:
 				page.Error = append(page.Error, fmt.Sprint(err))
 			} else {
 				page.Intermediate = result
-				page.IntermediateStr = fmt.Sprint(result)
 			}
 		}
 	}()
