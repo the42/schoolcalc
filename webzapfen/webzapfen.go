@@ -13,9 +13,11 @@ import (
 	"github.com/the42/schoolcalc"
 	"html/template"
 	"io"
+	"log"
 	"math/big"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 )
@@ -141,6 +143,7 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 	func() {
 		defer func() { // want to handle division by zero
 			if err := recover(); err != nil {
+				log.Printf("%s", debug.Stack())
 				page.Error = append(page.Error, fmt.Sprint(err))
 			}
 		}()
@@ -298,6 +301,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// error handler: Recover from panic by setting http error 500 and letting the user know the reason
 	defer func() {
 		if err := recover(); err != nil {
+			log.Printf("%s", debug.Stack())
 			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
 		}
 	}()
