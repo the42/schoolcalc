@@ -132,7 +132,8 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
 		if err != nil {
-			if _, ok := err.(*os.PathError); ok && retry < 1 {
+			if os.IsNotExist(err) && retry < 1 {
+				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
 				lang = defaultlang
 			} else {
 				panic(err)
@@ -253,7 +254,8 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("ZapfenTemplate").Funcs(templzapfenfuncMap).ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
 		if err != nil {
-			if _, ok := err.(*os.PathError); ok && retry < 1 {
+			if os.IsNotExist(err) && retry < 1 {
+				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
 				lang = defaultlang
 			} else {
 				panic(err)
