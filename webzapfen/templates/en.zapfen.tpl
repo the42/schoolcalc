@@ -2,8 +2,19 @@
 <html>
   <head>
     <style type="text/css">
-      TD.zapfenmultiplier, TD.zapfendividend {
-        text-align: right
+      .zapfenmultiplier, .zapfendividend {
+        text-align: right;
+    }
+      .zapfendividendintermed {
+        float:right;
+    }
+      .zapfenintermeddivisionrow {
+        vertical-align:top;
+    }
+      .divisionColumn[data-division=true][data-boxed=true] {
+	border: 1px solid black;
+	display: inline-block;
+	float: left;
     }
     </style>
     <title>Webzapfen</title>
@@ -21,7 +32,7 @@
   </form>{{if .Zapfen}}
   <div class="zapfenOutputArea">
     <table>
-      {{tplfunczapfendisplay .Zapfen}}
+      {{tplfunczapfendisplay .Zapfen .IntermedZapfen true}}
     </table>
   </div>{{end}}
   </body>

@@ -54,7 +54,7 @@ type divisionPage struct {
 func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.HTML) {
 	if sd != nil {
 		dividendivisorresult := fmt.Sprintf("%s:%s=%s", sd.NormalizedDividend, sd.NormalizedDivisor, sd.Result)
-		var column template.HTML
+		var column string
 		var runlen int
 
 		if len(dividendivisorresult) > int(sd.ActualPrec) {
@@ -69,25 +69,25 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.
 		for i := 0; i < runlen; i++ {
 
 			if i < lastdivColumn {
-				column = template.HTML(fmt.Sprintf(`<div class="divisionColumn" data-division="true" data-boxed="%t">`, boxed))
+				column = fmt.Sprintf(`<div class="divisionColumn" data-division="true" data-boxed="%t">`, boxed)
 			} else {
-				column = template.HTML(`<div class="divisionColumn" data-result="true">`)
+				column = `<div class="divisionColumn" data-result="true">`
 			}
 
 			if i < len(dividendivisorresult) {
-				column += template.HTML(dividendivisorresult[i]) + "<br />"
+				column += string(dividendivisorresult[i]) + "<br />"
 			} else {
 				column += "<br />"
 			}
 
 			for _, elm := range sd.DivisionSteps {
 				if i >= elm.Indent && i < elm.Indent+len(elm.Iremainder) {
-					column += template.HTML(elm.Iremainder[i-elm.Indent]) + "<br />"
+					column += string(elm.Iremainder[i-elm.Indent]) + "<br />"
 				} else {
 					column += "<br />"
 				}
 			}
-			htmlResult += column + "</div>\n"
+			htmlResult += template.HTML(column) + "</div>\n"
 		}
 	}
 	return
@@ -171,10 +171,11 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 }
 
 type zapfenPage struct {
-	Error     []string
-	Number    string
-	ZapfenStr string
+	Error  []string
+	Number string
 	*schoolcalc.Zapfen
+	IntermedZapfen [8]*schoolcalc.SDivide
+	boxed          bool
 }
 
 // Uses a cell for every digit to display the zapfen
@@ -222,7 +223,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
 }
 */
 
-func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
+func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivide, boxed bool) template.HTML {
 	var retstring string
 	if zapfen != nil {
 		input := zapfen.Zapfenzahl
@@ -233,7 +234,26 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
 		}
 
 		for i := 0; i < 8; i++ {
-			retstring += fmt.Sprintf("\n<tr id='zapfendividend%d'>\n<td class='zapfendividend'>%s</td><td>/</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
+			retstring += fmt.Sprintf("\n<tr id='zapfendividend%d'>\n  <td class='zapfendividend'>%s</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
+
+			var divisorintermed string = ""
+
+			for dividendcolums := 0; dividendcolums < len(steps[i].NormalizedDividend); dividendcolums++ {
+
+				column := fmt.Sprintf(`<div class="divisionColumn" data-division="true" data-boxed="%t">`, boxed)
+				column += string(steps[i].NormalizedDividend[dividendcolums]) + "<br />"
+
+				for _, elm := range steps[i].DivisionSteps {
+					if dividendcolums >= elm.Indent && dividendcolums < elm.Indent+len(elm.Iremainder) {
+						column += string(elm.Iremainder[dividendcolums-elm.Indent]) + "<br />"
+					} else {
+						column += "<br />"
+					}
+				}
+				divisorintermed += column + "</div>\n"
+			}
+
+			retstring += fmt.Sprintf("\n<tr class='zapfenintermeddivisionrow'>\n<td class='zapfendividendintermed'>\n%s\n</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>", divisorintermed, i+2, zapfen.Divzapfen[i])
 			input = zapfen.Divzapfen[i]
 		}
 	}
@@ -266,8 +286,14 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	if len(page.Number) >= 1 {
 		if num, ok := big.NewInt(0).SetString(page.Number, 10); ok {
 			result := schoolcalc.ZapfenRechnung(num)
-			page.ZapfenStr = fmt.Sprint(result)
 			page.Zapfen = result
+
+			dividend := result.Multzapfen[7].String()
+			for i := 0; i < 8; i++ {
+				divresult, _ := schoolcalc.SchoolDivide(dividend, strconv.Itoa(i+2), 0)
+				page.IntermedZapfen[i] = divresult
+				dividend = result.Divzapfen[i].String()
+			}
 		} else {
 			page.Error = append(page.Error, fmt.Sprintf("Not a valid integer: '%s'", page.Number))
 		}
