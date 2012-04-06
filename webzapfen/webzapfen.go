@@ -223,7 +223,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
 }
 */
 
-func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivide, boxed bool) template.HTML {
+func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivide) template.HTML {
 	var retstring string
 	if zapfen != nil {
 		input := zapfen.Zapfenzahl
@@ -240,7 +240,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 
 			for dividendcolums := 0; dividendcolums < len(steps[i].NormalizedDividend); dividendcolums++ {
 
-				column := fmt.Sprintf(`<div class="divisionColumn" data-division="true" data-boxed="%t">`, boxed)
+				column := `<div class="divisionColumn" data-division="true" data-boxed="true">`
 				column += string(steps[i].NormalizedDividend[dividendcolums]) + "<br />"
 
 				for _, elm := range steps[i].DivisionSteps {
