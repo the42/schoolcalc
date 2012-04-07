@@ -234,7 +234,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 		}
 
 		for i := 0; i < 8; i++ {
-			retstring += fmt.Sprintf("\n<tr id='zapfendividend%d'>\n  <td class='zapfendividend'>%s</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
+			retstring += fmt.Sprintf("\n<tr>\n  <td class='zapfendividend'><a href='#' class='zapfendividenditem emptylink' id='zapfendividenditem%d'>%s</a></td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
 
 			var divisorintermed string = ""
 
@@ -253,7 +253,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 				divisorintermed += column + "</div>\n"
 			}
 
-			retstring += fmt.Sprintf("\n<tr class='zapfenintermeddivisionrow'>\n<td class='zapfendividendintermed'>\n%s\n</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>", divisorintermed, i+2, zapfen.Divzapfen[i])
+			retstring += fmt.Sprintf("\n<tr class='zapfenintermeddivisionrow' id='zapfenintermeddivisionrow%d'>\n<td class='zapfendividendintermed'>\n%s\n</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>", i, divisorintermed, i+2, zapfen.Divzapfen[i])
 			input = zapfen.Divzapfen[i]
 		}
 	}
