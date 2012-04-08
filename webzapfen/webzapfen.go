@@ -87,7 +87,7 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.
 					column += "<br />"
 				}
 			}
-			htmlResult += template.HTML(column) + "</div>\n"
+			htmlResult += template.HTML(column) + "</div>"
 		}
 	}
 	return
@@ -205,7 +205,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 						column += "<br />"
 					}
 				}
-				divisorintermed += column + "</div>\n"
+				divisorintermed += column + "</div>"
 			}
 
 			retstring += fmt.Sprintf("\n<tr class='zapfenintermeddivisionrow' id='zapfenintermeddivisionrow%d'>\n<td class='zapfendividendintermed'>\n%s\n</td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>", i, divisorintermed, i+2, zapfen.Divzapfen[i])

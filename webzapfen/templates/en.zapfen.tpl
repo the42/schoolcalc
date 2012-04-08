@@ -18,7 +18,6 @@
     .divisionColumn[data-division=true][data-boxed=true] {
       border: 1px solid black;
       display: inline-block;
-      float: left;
     }
     a.emptylink {
       color:blue;

@@ -4,11 +4,9 @@
     <style type="text/css">
     .divisionOutputArea {
       background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
-      overflow: hidden;
     }
-    .divisionColumn[data-division=true], .divisionColumn[data-result=true] {
+    .divisionColumn[data-division=true],.divisionColumn[data-result=true] {
       display: inline-block;
-      float: left;
     }
     .divisionColumn[data-division=true][data-boxed=true] {
       border: 1px solid black;
@@ -36,8 +34,7 @@
     </p>
   </form>{{if .SDivide}}
   <div class="divisionOutputArea">
-  {{tplfuncdivdisplay .SDivide .Boxed}}
-Hallo Welt!
+    {{tplfuncdivdisplay .SDivide .Boxed}}
   </div>{{end}}
   <script type="text/javascript">
     function changeBox() {
