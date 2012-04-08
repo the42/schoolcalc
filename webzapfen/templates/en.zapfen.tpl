@@ -2,6 +2,9 @@
 <html>
   <head>
     <style type="text/css">
+    .zapfenOutputArea {
+      background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
+    }
     .zapfenmultiplier, .zapfendividend {
       text-align: right;
     }
@@ -22,7 +25,6 @@
       text-decoration: none;
     }
     a.emptylink:hover {
-      color:blue;
       font-weight:bold;
     }
     </style>
@@ -39,7 +41,7 @@
     Number: <input type="text" name="number" value="{{.Number}}" autofocus="true"/>
     <input type="submit" value="Submit" />
   </form>{{if .Zapfen}}
-  <a href='#' id='toggleallintermedsteps' class='emptylink'>Toggle</a> display of intermediate division steps
+  <button id='toggleallintermedsteps' >Toggle</button> display of intermediate division steps
   <div class="zapfenOutputArea">
     <table>
       {{tplfunczapfendisplay .Zapfen .IntermedZapfen}}
