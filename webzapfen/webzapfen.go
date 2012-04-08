@@ -178,51 +178,6 @@ type zapfenPage struct {
 	boxed          bool
 }
 
-// Uses a cell for every digit to display the zapfen
-/*
-func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen) template.HTML {
-	var retstring string
-	if zapfen != nil {
-
-		input := zapfen.Zapfenzahl
-		inputzahlstr := input.String()
-
-		for mults := 0; mults < 8; mults++ {
-			retstring += "<tr>\n" + "  " + strings.Repeat("<td></td>", zapfen.Longest-len(inputzahlstr))
-			for _, multrune := range inputzahlstr {
-				retstring += fmt.Sprintf("<td>%c</td>", multrune)
-			}
-			retstring += fmt.Sprintf("<td>x</td><td>%d</td><td>=</td>", mults+2)
-
-			input = zapfen.Multzapfen[mults]
-			inputzahlstr = input.String()
-
-			for _, multrune := range inputzahlstr {
-				retstring += fmt.Sprintf("<td>%c</td>", multrune)
-			}
-			retstring += "\n</tr>"
-		}
-
-		for divs := 0; divs < 8; divs++ {
-			retstring += "\n<tr>\n" + "  " + strings.Repeat("<td></td>", zapfen.Longest-len(inputzahlstr))
-			for _, divrune := range inputzahlstr {
-				retstring += fmt.Sprintf("<td>%c</td>", divrune)
-			}
-			retstring += fmt.Sprintf("<td>/</td><td>%d</td><td>=</td>", divs+2)
-
-			input = zapfen.Divzapfen[divs]
-			inputzahlstr = input.String()
-
-			for _, divrune := range inputzahlstr {
-				retstring += fmt.Sprintf("<td>%c</td>", divrune)
-			}
-			retstring += "\n</tr>"
-		}
-	}
-	return template.HTML(retstring)
-}
-*/
-
 func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivide) template.HTML {
 	var retstring string
 	if zapfen != nil {
