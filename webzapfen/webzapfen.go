@@ -259,9 +259,9 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 
 func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
 
-	_, err = fmt.Fprintf(w, "Got language: %s", lang)
+	// _, err = fmt.Fprintf(w, "Got language: %s", lang)
 
-	tpl, err := template.ParseFiles(lang + "." + roottplfilename)
+	tpl, err := template.New("SchoolCalcRoot").ParseFiles(roottemplatedir + lang + "." + roottplfilename)
 	if err != nil {
 		panic(err)
 	}
@@ -366,6 +366,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.Handle("/", &webhandler{rootHandler, true})
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.Handle("/division/", &webhandler{divisionHandler, true})
 	http.Handle("/zapfen/", &webhandler{zapfenHandler, true})
 	http.ListenAndServe(applicationport, nil)
