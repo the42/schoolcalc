@@ -1,17 +1,7 @@
 {{define "DivisionTemplate"}}<!DOCTYPE HTML>
 <html>
   <head>
-    <style type="text/css">
-    .divisionOutputArea {
-      background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
-    }
-    .divisionColumn[data-division=true],.divisionColumn[data-result=true] {
-      display: inline-block;
-    }
-    .divisionColumn[data-division=true][data-boxed=true] {
-      border: 1px solid black;
-    }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/>
     <title>Division</title>
   </head>
   <body>
@@ -45,7 +35,6 @@
 	}
       }
     }
-
     document.getElementById('boxedresult').addEventListener('click', changeBox);
     document.getElementById('submitprec').addEventListener('click', function() { document.forms[0].submit();} );
   </script>

@@ -257,7 +257,7 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
-func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
+func rootHandler(w io.Writer, req *http.Request, lang string) error {
 
 	// _, err = fmt.Fprintf(w, "Got language: %s", lang)
 
@@ -265,8 +265,8 @@ func rootHandler(w io.Writer, req *http.Request, lang string) (err error) {
 	if err != nil {
 		panic(err)
 	}
-	err = tpl.Execute(w, nil)
-	return
+
+	return tpl.Execute(w, nil)
 }
 
 func validlanguage(language string) bool {

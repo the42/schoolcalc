@@ -1,32 +1,7 @@
 {{define "ZapfenTemplate"}}<!DOCTYPE HTML>
 <html>
   <head>
-    <style type="text/css">
-    .zapfenOutputArea {
-      background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
-    }
-    .zapfenmultiplier, .zapfendividend {
-      text-align: right;
-    }
-    .zapfendividendintermed {
-      float:right;
-    }
-    .zapfenintermeddivisionrow {
-      vertical-align:top;
-      display:none;
-    }
-    .divisionColumn[data-division=true][data-boxed=true] {
-      border: 1px solid black;
-      display: inline-block;
-    }
-    a.emptylink {
-      color:blue;
-      text-decoration: none;
-    }
-    a.emptylink:hover {
-      font-weight:bold;
-    }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/>
     <title>Webzapfen</title>
   </head>
   <body>

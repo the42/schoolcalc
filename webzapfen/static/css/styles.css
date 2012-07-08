@@ -64,7 +64,7 @@ a, p a {
 	color: white;
 }
 	
-a: hover {
+a:hover {
    color: white;
 }
 
@@ -330,7 +330,7 @@ nav ul li a {
    text-decoration: none;
 }
 
-nav ul li a: hover {
+nav ul li a:hover {
 	color: #CC3333;
 }
 
@@ -369,7 +369,7 @@ nav ul li a.current {
 	padding-left: 20px;
 }
 	
-.content_menu ul li a: hover {
+.content_menu ul li a:hover {
    color: #33CC99;
 }
 
@@ -416,4 +416,42 @@ nav ul li a.current {
 .button: active {
 	position: relative;
 	top: 1px;
+}
+
+/***************************************************
+				   DIVISION
+***************************************************/
+.divisionOutputArea {
+  background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
+}
+.divisionColumn[data-division=true],.divisionColumn[data-result=true] {
+  display: inline-block;
+}
+.divisionColumn[data-division=true][data-boxed=true] {
+  border: 1px solid black;
+}
+    
+/***************************************************
+				   ZAPFEN
+***************************************************/
+    
+.zapfenOutputArea {
+  background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmAQMAAACS83vtAAAAAXNSR0IArs4c6QAAAAZQTFRF////mcz/7U0nzgAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wECAceA9EbgDsAAAAYSURBVAjXY2BgUGBgYaAP+R8I/jDQ3UYApJwPAeJX0y0AAAAASUVORK5CYII=);
+    }
+.zapfenmultiplier, .zapfendividend {
+  text-align: right;
+}
+.zapfendividendintermed {
+  float:right;
+}
+.zapfenintermeddivisionrow {
+  vertical-align:top;
+  display:none;
+}
+a.emptylink {
+  color:blue;
+  text-decoration: none;
+}
+a.emptylink:hover {
+  font-weight:bold;
 }
