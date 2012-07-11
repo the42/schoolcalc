@@ -9,9 +9,7 @@
     <title>School Division: Divsion and Excercises for Dividing the Pen and Paper Method</title>
   </head>
   <body>
-
-
-   <div class="bg">
+  <div class="bg">
     <!--start container-->
     <div id="container">
     <!--start header-->
@@ -27,7 +25,7 @@
      	   <li><a href="#">Services</a></li>
      	   <li><a href="#">Portfolio</a></li>
          <li><a href="#">News</a></li>
-         <li><a href="#">Contact</a></li>
+         <li><a href="#">{{langselector}}</a></li>
          </ul>
       </nav>
   	   <!--end menu-->
@@ -45,7 +43,7 @@
    <!--start holder-->
    <div class="holder_content">
       <section class="group1">
-         <h3>About us</h3>
+         <h3>History of division</h3>
          <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec molestie. Sed aliquam sem ut arcu. Phasellus sollicitudin. 
          Vestibulum condimentum  facilisis nulla. In hac habitasse platea dictumst. Nulla nonummy.</p>
          <a class="photo_hover3" href="#"><img src="static/images/picture1.jpg" width="240" height="214" alt="picture1"/></a>
@@ -93,39 +91,5 @@
    </div>
    <!--end bg-->
    <!-- Free template distributed by http://freehtml5templates.com -->
-  </body>
-
-
-
-
-<!--
-  <header>
-    <h1>School Division: Divsion and Excercises for Dividing the Pen and Paper Method</h1>
-  </header>
-  <p>
-    This little tool will help you to learn divide the pen and paper method. Dividing the pen and paper method
-    is the hardest beside the three other primary calculating methods of Addition, Subtraction and Multiplication.
-  </p>
-  <div class="langsel">
-  </div>
-  <menu>
-    What do you want to do?
-
-    Learn
-      Learn more about the history of Division
-      Learn the Algorithm behind Dividing the pen and paper method
-
-    Test
-    Check    
-  </menu>
-    <!-- Dividend: <input type="text" name="dividend" value="{{.Dividend}}" autofocus="true"/>
-    Divisor: <input type="text" name="divisor" value="{{.Divisor}}" />
-    <input type="submit" value="Submit" />
-  </p>
-  <p>
-    Precision: <input type="text" name="prec" value="{{.Precision}}" />
-    Continue calculating until precision, even if remainder is already zero <input type="checkbox" id="submitprec" name="stopremz" value="false"{{if not .StopRemz}} checked="checked"{{end}}/>
-    Display boxes are off <input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/ -->
--->
   </body>
 </html>{{end}}

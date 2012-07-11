@@ -36,6 +36,7 @@ var (
 	roottemplatedir = conf_roottemplatedir()
 	rootdomain      = conf_rootdomain()
 	applicationport = conf_binding()
+	isolanguages    = conf_ISOlanguages()
 	languages       = conf_languages()
 )
 
@@ -93,7 +94,12 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.
 	return
 }
 
+func langselector() (htmlResult template.HTML) {
+	return "Here happens the magic"
+}
+
 var templdivfuncMap = template.FuncMap{
+	"langselector":      langselector,
 	"tplfuncdivdisplay": tplfuncdivdisplay,
 }
 
@@ -216,6 +222,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 }
 
 var templzapfenfuncMap = template.FuncMap{
+	"langselector":         langselector,
 	"tplfunczapfendisplay": tplfunczapfendisplay,
 }
 
@@ -257,20 +264,32 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
+var templrootfuncMap = template.FuncMap{
+	"langselector": langselector,
+}
+
 func rootHandler(w io.Writer, req *http.Request, lang string) error {
 
-	// _, err = fmt.Fprintf(w, "Got language: %s", lang)
+	var tpl *template.Template
+	var err error
 
-	tpl, err := template.New("SchoolCalcRoot").ParseFiles(roottemplatedir + lang + "." + roottplfilename)
-	if err != nil {
-		panic(err)
+	for retry := 0; retry <= 1; retry++ {
+		tpl, err = template.New("SchoolCalcRoot").Funcs(templrootfuncMap).ParseFiles(roottemplatedir + lang + "." + roottplfilename)
+		if err != nil {
+			if os.IsNotExist(err) && retry < 1 {
+				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				lang = defaultlang
+			} else {
+				panic(err)
+			}
+		}
 	}
 
 	return tpl.Execute(w, nil)
 }
 
 func validlanguage(language string) bool {
-	for _, lang := range languages {
+	for _, lang := range isolanguages {
 		if lang == language {
 			return true
 		}
@@ -298,7 +317,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if validlanguage(language) {
 			setcookie = true
 		} else {
-			panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, languages))
+			panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, isolanguages))
 		}
 	} else {
 		language = defaultlang
@@ -313,7 +332,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// We set the cookie and redirect to the language subdomain
 		mustredirect = true
 	} else if !validlanguage(language) {
-		panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, languages))
+		panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, isolanguages))
 	} else if err != nil {
 		panic(err)
 	}
@@ -355,7 +374,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes())) // We have to set the content type, otherwise the ResponseWriter will guess it's application/x-gzip
 		gzwriter.Write(buf.Bytes())
-		gzwriter.Close() // Otherwise the content won't get flushed to the output stream
+		gzwriter.Close() // otherwise the content won't get flushed to the output stream
 
 		buf = gzbuf
 	}

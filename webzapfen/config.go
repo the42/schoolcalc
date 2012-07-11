@@ -21,10 +21,10 @@ type config struct {
 	RootDomain      string
 	Binding         string
 	RootTemplateDir string
-	Languages       []string
+	Languages       map[string]string
 }
 
-var conf = &config{RootDomain: "webzapfen.hoechtl.at", Binding: ":1112", Languages: []string{"de", "en"}, RootTemplateDir: "./templates/"}
+var conf = &config{RootDomain: "webzapfen.hoechtl.at", Binding: ":1112", Languages: map[string]string{"de": "Deutsch", "en": "Englisch"}, RootTemplateDir: "./templates/"}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
@@ -51,7 +51,17 @@ func conf_rootdomain() string {
 	return conf.RootDomain
 }
 
-func conf_languages() []string {
+func conf_ISOlanguages() []string {
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	languages := []string{}
+	for key, _ := range conf.Languages {
+		languages = append(languages, key)
+	}
+	return languages
+}
+
+func conf_languages() map[string]string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
 	return conf.Languages
