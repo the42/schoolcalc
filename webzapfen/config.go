@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 )
 
 var configFileName = flag.String("config", "config.json", "location of JSON configuration file")
@@ -22,9 +23,14 @@ type config struct {
 	Binding         string
 	RootTemplateDir string
 	Languages       map[string]string
+	TimeOut         int
 }
 
-var conf = &config{RootDomain: "webzapfen.hoechtl.at", Binding: ":1112", Languages: map[string]string{"de": "Deutsch", "en": "Englisch"}, RootTemplateDir: "./templates/"}
+var conf = &config{RootDomain: "webzapfen.hoechtl.at",
+	Binding:         ":1112",
+	Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
+	RootTemplateDir: "./templates/",
+	TimeOut:         3600}
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
@@ -51,6 +57,10 @@ func conf_rootdomain() string {
 	return conf.RootDomain
 }
 
+// this function returns a sorted list of supported langauge abbreviations
+// you should use this slice when to iterate over the full list of languages,
+// especially if you need the full list of langauges in a repeatedly consistent
+// and sorted manner
 func conf_ISOlanguages() []string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
@@ -58,6 +68,7 @@ func conf_ISOlanguages() []string {
 	for key, _ := range conf.Languages {
 		languages = append(languages, key)
 	}
+	sort.Strings(languages)
 	return languages
 }
 
@@ -77,4 +88,10 @@ func conf_roottemplatedir() string {
 	flag.Parse()
 	readConfig(*configFileName, conf)
 	return conf.RootTemplateDir
+}
+
+func conf_statictimeout() int {
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	return conf.TimeOut
 }

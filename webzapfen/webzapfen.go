@@ -2,8 +2,9 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 
-// This command implements a web server which serves Zapfenrechnung
-// and displays intermediate division steps 
+// This program implements a web server which serves Zapfenrechnung and
+// divisions, displays intermediate division steps and can present the
+// user some rendered divisons for self-test
 package main
 
 import (
@@ -38,6 +39,7 @@ var (
 	applicationport = conf_binding()
 	isolanguages    = conf_ISOlanguages()
 	languages       = conf_languages()
+	statictimeout   = conf_statictimeout()
 )
 
 type webhandler struct {
@@ -50,6 +52,7 @@ type divisionPage struct {
 	*schoolcalc.SDivide
 	Error           []string
 	StopRemz, Boxed bool
+	CurrLang        string
 }
 
 func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.HTML) {
@@ -94,8 +97,18 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.
 	return
 }
 
-func langselector() (htmlResult template.HTML) {
-	return "Here happens the magic"
+func langselector(currlang string) (htmlResult template.HTML) {
+	var htmlString string
+
+	for _, key := range isolanguages {
+		if key != currlang {
+			htmlString += fmt.Sprintf(`<a href=".?setlanguage=%s">%s</a>`, key, languages[key])
+		} else {
+			htmlString += languages[key]
+		}
+	}
+
+	return template.HTML(htmlString)
 }
 
 var templdivfuncMap = template.FuncMap{
@@ -110,7 +123,8 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
 	dividend := strings.TrimSpace(req.URL.Query().Get("dividend"))
 	divisor := strings.TrimSpace(req.URL.Query().Get("divisor"))
-	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true}
+
+	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true, CurrLang: lang}
 
 	prec := 0
 	page.Precision = strings.TrimSpace(req.URL.Query().Get("prec"))
@@ -139,7 +153,9 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 		tpl, err = template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
-				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				log.Printf(errstring)
+				page.Error = append(page.Error, errstring)
 				lang = defaultlang
 			} else {
 				panic(err)
@@ -182,6 +198,7 @@ type zapfenPage struct {
 	*schoolcalc.Zapfen
 	IntermedZapfen [8]*schoolcalc.SDivide
 	boxed          bool
+	CurrLang       string
 }
 
 func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivide) template.HTML {
@@ -231,13 +248,15 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	var tpl *template.Template
 	var err error
 
-	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number"))}
+	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), CurrLang: lang}
 
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("ZapfenTemplate").Funcs(templzapfenfuncMap).ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
-				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				log.Printf(errstring)
+				page.Error = append(page.Error, errstring)
 				lang = defaultlang
 			} else {
 				panic(err)
@@ -264,6 +283,11 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
+type rootPage struct {
+	Error    []string
+	CurrLang string
+}
+
 var templrootfuncMap = template.FuncMap{
 	"langselector": langselector,
 }
@@ -273,11 +297,15 @@ func rootHandler(w io.Writer, req *http.Request, lang string) error {
 	var tpl *template.Template
 	var err error
 
+	page := &rootPage{CurrLang: lang}
+
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("SchoolCalcRoot").Funcs(templrootfuncMap).ParseFiles(roottemplatedir + lang + "." + roottplfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
-				log.Printf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				log.Printf(errstring)
+				page.Error = append(page.Error, errstring)
 				lang = defaultlang
 			} else {
 				panic(err)
@@ -285,7 +313,7 @@ func rootHandler(w io.Writer, req *http.Request, lang string) error {
 		}
 	}
 
-	return tpl.Execute(w, nil)
+	return tpl.Execute(w, page)
 }
 
 func validlanguage(language string) bool {
@@ -383,10 +411,18 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	buf.WriteTo(w)
 }
 
-func main() {
+// modelled after https://groups.google.com/d/msg/golang-nuts/n-GjwsDlRco/2l8kpJbAHHwJ
+// another good read: http://www.mnot.net/cache_docs/
+func maxAgeHandler(seconds int, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", fmt.Sprintf("max-age=%d, public, must-revalidate, proxy-revalidate", seconds))
+		h.ServeHTTP(w, r)
+	})
+}
+
+func init() {
 	http.Handle("/", &webhandler{rootHandler, true})
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", maxAgeHandler(statictimeout, http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
 	http.Handle("/division/", &webhandler{divisionHandler, true})
 	http.Handle("/zapfen/", &webhandler{zapfenHandler, true})
-	http.ListenAndServe(applicationport, nil)
 }
