@@ -27,7 +27,10 @@
       </nav>
   	   <!--end menu-->
       <!--end header-->
-	</header>
+	</header>{{if .Error}}
+  <p>{{range .Error}}
+    {{.}}<br/>{{end}}
+  </p>{{end}}
    <!--start intro-->
    <section id="intro">
       <hgroup>
