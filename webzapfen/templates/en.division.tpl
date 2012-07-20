@@ -1,5 +1,5 @@
 {{define "DivisionTemplate"}}<!DOCTYPE HTML>
-<html>
+<html lang="{{.CurrLang}}">
   <head>
     <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/>
     <title>Division</title>

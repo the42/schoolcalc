@@ -1,5 +1,5 @@
 {{define "SchoolCalcRoot"}}<!DOCTYPE HTML>
-<html>
+<html lang="{{.CurrLang}}">
   <head>
   <meta charset="UTF-8">
     <title>Division for pupils</title>
@@ -21,12 +21,9 @@
   	   <nav>
          <ul>
          <li><a href="#" class="current">Home</a></li>
-         <li><a href="#">About us</a></li>
-     	   <li><a href="#">Services</a></li>
-     	   <li><a href="#">Portfolio</a></li>
          <li><a href="#">News</a></li>
-         <li><a href="#">{{langselector}}</a></li>
          </ul>
+{{langselector .CurrLang}}
       </nav>
   	   <!--end menu-->
       <!--end header-->
