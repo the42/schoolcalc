@@ -26,21 +26,13 @@ type config struct {
 	TimeOut         int
 }
 
-var conf = &config{RootDomain: "webzapfen.hoechtl.at",
-	Binding:         ":1112",
-	Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
-	RootTemplateDir: "./templates/",
-	TimeOut:         3600}
+var conf *config
 
 func readConfig(filename string, conf *config) {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return
-	}
-
-	if conf == nil {
-		conf = &config{}
 	}
 
 	err = json.Unmarshal(b, &conf)
@@ -51,9 +43,22 @@ func readConfig(filename string, conf *config) {
 	return
 }
 
+func createorreturnconfig(conf *config) *config {
+	if conf == nil {
+		conf = &config{RootDomain: "webzapfen.hoechtl.at",
+			Binding:         ":1112",
+			Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
+			RootTemplateDir: "./templates/",
+			TimeOut:         3600}
+
+		flag.Parse()
+		readConfig(*configFileName, conf)
+	}
+	return conf
+}
+
 func conf_rootdomain() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	return conf.RootDomain
 }
 
@@ -62,8 +67,7 @@ func conf_rootdomain() string {
 // especially if you need the full list of langauges in a repeatedly consistent
 // and sorted manner
 func conf_ISOlanguages() []string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	languages := []string{}
 	for key, _ := range conf.Languages {
 		languages = append(languages, key)
@@ -73,25 +77,21 @@ func conf_ISOlanguages() []string {
 }
 
 func conf_languages() map[string]string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	return conf.Languages
 }
 
 func conf_binding() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	return conf.Binding
 }
 
 func conf_roottemplatedir() string {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	return conf.RootTemplateDir
 }
 
 func conf_statictimeout() int {
-	flag.Parse()
-	readConfig(*configFileName, conf)
+	conf = createorreturnconfig(conf)
 	return conf.TimeOut
 }

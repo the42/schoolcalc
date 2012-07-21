@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	roottplfilename  = "index.tpl"
+	roottplfilename  = "_root.tpl"
+	indextplfilename = "index.tpl"
 	divisionfilename = "division.tpl"
 	zapfenfilename   = "zapfen.tpl"
 	defaultlang      = "en"
@@ -33,21 +34,13 @@ const (
 	redirectparam    = "redirect"
 )
 
-var (
-	roottemplatedir = conf_roottemplatedir()
-	rootdomain      = conf_rootdomain()
-	applicationport = conf_binding()
-	isolanguages    = conf_ISOlanguages()
-	languages       = conf_languages()
-	statictimeout   = conf_statictimeout()
-)
-
 type webhandler struct {
 	handler  func(w io.Writer, req *http.Request, lang string) error
 	compress bool
 }
 
 type divisionPage struct {
+	Title                        string
 	Dividend, Divisor, Precision string
 	*schoolcalc.SDivide
 	Error           []string
@@ -100,11 +93,11 @@ func tplfuncdivdisplay(sd *schoolcalc.SDivide, boxed bool) (htmlResult template.
 func langselector(currlang string) (htmlResult template.HTML) {
 	var htmlString string
 
-	for _, key := range isolanguages {
+	for _, key := range conf_ISOlanguages() {
 		if key != currlang {
-			htmlString += fmt.Sprintf(`<a href=".?setlanguage=%s">%s</a>`, key, languages[key])
+			htmlString += fmt.Sprintf(`<a href=".?setlanguage=%s">%s</a>`, key, conf_languages()[key])
 		} else {
-			htmlString += languages[key]
+			htmlString += conf_languages()[key]
 		}
 	}
 
@@ -150,7 +143,7 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 	}
 
 	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("DivisionTemplate").Funcs(templdivfuncMap).ParseFiles(roottemplatedir + lang + "." + divisionfilename)
+		tpl, err = template.New("DivisionSetup").Funcs(templdivfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+divisionfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
 				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
@@ -193,6 +186,7 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 }
 
 type zapfenPage struct {
+	Title  string
 	Error  []string
 	Number string
 	*schoolcalc.Zapfen
@@ -251,7 +245,7 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), CurrLang: lang}
 
 	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("ZapfenTemplate").Funcs(templzapfenfuncMap).ParseFiles(roottemplatedir + lang + "." + zapfenfilename)
+		tpl, err = template.New("DivisionSetup").Funcs(templzapfenfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+zapfenfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
 				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
@@ -300,7 +294,7 @@ func rootHandler(w io.Writer, req *http.Request, lang string) error {
 	page := &rootPage{CurrLang: lang}
 
 	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("SchoolCalcRoot").Funcs(templrootfuncMap).ParseFiles(roottemplatedir + lang + "." + roottplfilename)
+		tpl, err = template.New("DivisionSetup").Funcs(templrootfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+indextplfilename)
 		if err != nil {
 			if os.IsNotExist(err) && retry < 1 {
 				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
@@ -317,7 +311,7 @@ func rootHandler(w io.Writer, req *http.Request, lang string) error {
 }
 
 func validlanguage(language string) bool {
-	for _, lang := range isolanguages {
+	for _, lang := range conf_ISOlanguages() {
 		if lang == language {
 			return true
 		}
@@ -345,7 +339,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if validlanguage(language) {
 			setcookie = true
 		} else {
-			panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, isolanguages))
+			panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, conf_ISOlanguages()))
 		}
 	} else {
 		language = defaultlang
@@ -355,12 +349,12 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// either the default language or the language given as a request parameter
 	langCookie, err := req.Cookie(cookie_lang)
 	if err == http.ErrNoCookie || setcookie {
-		langCookie = &http.Cookie{Name: cookie_lang, Value: language, Path: "/", Domain: "." + rootdomain}
+		langCookie = &http.Cookie{Name: cookie_lang, Value: language, Path: "/", Domain: "." + conf_rootdomain()}
 		http.SetCookie(w, langCookie)
 		// We set the cookie and redirect to the language subdomain
 		mustredirect = true
 	} else if !validlanguage(language) {
-		panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, isolanguages))
+		panic(fmt.Sprintf("Not a valid language '%s'. Valid languages are: %v", language, conf_ISOlanguages()))
 	} else if err != nil {
 		panic(err)
 	}
@@ -383,7 +377,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		} else {
 			scheme = "https://"
 		}
-		http.Redirect(w, req, scheme+language+"."+rootdomain+applicationport+redirect, http.StatusSeeOther)
+		http.Redirect(w, req, scheme+language+"."+conf_rootdomain()+conf_binding()+redirect, http.StatusSeeOther)
 		return
 	}
 
@@ -422,7 +416,7 @@ func maxAgeHandler(seconds int, h http.Handler) http.Handler {
 
 func init() {
 	http.Handle("/", &webhandler{rootHandler, true})
-	http.Handle("/static/", maxAgeHandler(statictimeout, http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
+	http.Handle("/static/", maxAgeHandler(conf_statictimeout(), http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
 	http.Handle("/division/", &webhandler{divisionHandler, true})
 	http.Handle("/zapfen/", &webhandler{zapfenHandler, true})
 }
