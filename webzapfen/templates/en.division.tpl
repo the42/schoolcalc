@@ -1,16 +1,7 @@
-{{define "DivisionTemplate"}}<!DOCTYPE HTML>
-<html lang="{{.CurrLang}}">
-  <head>
-    <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/>
-    <title>Division</title>
-  </head>
-  <body>
+{{define "Title"}}Division{{end}}{{define "PathToStatic"}}../static/{{end}}{{define "Payload"}}
   <header>
     <h1>Division</h1>
-  </header>{{if .Error}}
-  <p>{{range .Error}}
-    {{.}}<br/>{{end}}
-  </p>{{end}}
+  </header>
   <form>
     <p>
       Dividend: <input type="text" name="dividend" value="{{.Dividend}}" autofocus="true"/>
@@ -37,6 +28,4 @@
     }
     document.getElementById('boxedresult').addEventListener('click', changeBox);
     document.getElementById('submitprec').addEventListener('click', function() { document.forms[0].submit();} );
-  </script>
-  </body>
-</html>{{end}}
+  </script>{{end}}

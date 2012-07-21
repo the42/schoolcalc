@@ -1,16 +1,7 @@
-{{define "ZapfenTemplate"}}<!DOCTYPE HTML>
-<html lang="{{.CurrLang}}">
-  <head>
-    <link rel="stylesheet" type="text/css" href="../static/css/styles.css"/>
-    <title>Webzapfen</title>
-  </head>
-  <body>
+{{define "Title"}}Webzapfen{{end}}{{define "PathToStatic"}}../static/{{end}}{{define "Payload"}}
   <header>
     <h1>Webzapfen</h1>
-  </header>{{if .Error}}
-  <p>{{range .Error}}
-    {{.}}<br/>{{end}}
-  </p>{{end}}
+  </header>
   <form>
     Number: <input type="text" name="number" value="{{.Number}}" autofocus="true"/>
     <input type="submit" value="Submit" />
@@ -40,6 +31,4 @@
     for(i=0; i < dividends.length; i++) {
 	dividends[i].addEventListener('click',  changeIntermediate);
     }
-  </script>{{end}}
-  </body>
-</html>{{end}}
+  </script>{{end}}{{end}}

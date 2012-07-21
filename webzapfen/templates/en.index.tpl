@@ -1,36 +1,4 @@
-{{define "SchoolCalcRoot"}}<!DOCTYPE HTML>
-<html lang="{{.CurrLang}}">
-  <head>
-  <meta charset="UTF-8">
-    <title>Division for pupils</title>
-    <link rel="shortcut icon" href="static/images/favicon.png" type="image/png"/> 
-    <link rel="icon" href="static/images/favicon.png" type="image/png"/>
-    <link rel="stylesheet" type="text/css" href="static/css/styles.css"/>
-    <title>School Division: Divsion and Excercises for Dividing the Pen and Paper Method</title>
-  </head>
-  <body>
-  <div class="bg">
-    <!--start container-->
-    <div id="container">
-    <!--start header-->
-    <header>
-      <!--start logo-->
-      <a href="#" id="logo"><img src="static/images/logo.png" width="180" height="43" alt="logo"/></a>    
-      <!--end logo-->
-      <!--start menu-->
-  	   <nav>
-         <ul>
-         <li><a href="#" class="current">Home</a></li>
-         <li><a href="#">News</a></li>
-         </ul>
-{{langselector .CurrLang}}
-      </nav>
-  	   <!--end menu-->
-      <!--end header-->
-	</header>{{if .Error}}
-  <p>{{range .Error}}
-    {{.}}<br/>{{end}}
-  </p>{{end}}
+{{define "Title"}}Root of Division{{end}}{{define "PathToStatic"}}static/{{end}}{{define "Payload"}}
    <!--start intro-->
    <section id="intro">
       <hgroup>
@@ -78,18 +46,4 @@
        </section>
    </div>
    <!--end holder-->
-   </div>
-   <!--end container-->
-   <!--start footer-->
-   <footer>
-      <div class="container">  
-         <div id="FooterTwo"> © 2011 Minimalism </div>
-         <div id="FooterTree"> Valid html5, design and code by <a href="http://www.marijazaric.com">marija zaric - creative simplicity</a> </div> 
-      </div>
-   </footer>
-   <!--end footer-->
-   </div>
-   <!--end bg-->
-   <!-- Free template distributed by http://freehtml5templates.com -->
-  </body>
-</html>{{end}}
+   <!-- Free template distributed by http://freehtml5templates.com -->{{end}}
