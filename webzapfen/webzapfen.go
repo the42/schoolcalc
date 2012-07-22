@@ -18,6 +18,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -46,8 +47,9 @@ var menustructure = []menulayout{
 }
 
 type webhandler struct {
-	handler  func(w io.Writer, req *http.Request, lang string) error
-	compress bool
+	handler      func(w io.Writer, req *http.Request, lang string) error
+	compress     bool
+	seccachetime int
 }
 
 type rootPage struct {
@@ -61,7 +63,7 @@ func langselector(currlang string) template.HTML {
 
 	for _, key := range conf_ISOlanguages() {
 		if key != currlang {
-			htmlString += fmt.Sprintf(`<a href=".?setlanguage=%s">%s</a>`, key, conf_languages()[key])
+			htmlString += fmt.Sprintf(`<a href="?setlanguage=%s">%s</a>`, key, conf_languages()[key])
 		} else {
 			htmlString += conf_languages()[key]
 		}
@@ -334,6 +336,36 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
+func staticHTMLPageHandler(w io.Writer, req *http.Request, lang string) error {
+
+	var tpl *template.Template
+	var err error
+
+	page := &rootPage{CurrLang: lang, URL: req.URL.String()}
+
+	directory := path.Dir(req.URL.Path)
+	file := path.Base(req.URL.Path)
+
+	for retry := 0; retry <= 1; retry++ {
+
+		detailedfile := "." + directory + "/" + lang + "." + file
+
+		tpl, err = template.New("DivisionSetup").Funcs(templrootfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, detailedfile)
+		if err != nil {
+			if os.IsNotExist(err) && retry < 1 {
+				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				log.Printf(errstring)
+				page.Error = append(page.Error, errstring)
+				lang = defaultlang
+			} else {
+				panic(err)
+			}
+		}
+	}
+
+	return tpl.Execute(w, page)
+}
+
 func validlanguage(language string) bool {
 	for _, lang := range conf_ISOlanguages() {
 		if lang == language {
@@ -426,6 +458,11 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	// Prevent chunking of result
 	w.Header().Set("Content-Length", strconv.Itoa(buf.Len()))
+
+	// set cache timeout
+	if wh.seccachetime > 0 {
+		w.Header().Add("Cache-Control", fmt.Sprintf("max-age=%d, public, must-revalidate, proxy-revalidate", wh.seccachetime))
+	}
 	buf.WriteTo(w)
 }
 
@@ -439,8 +476,9 @@ func maxAgeHandler(seconds int, h http.Handler) http.Handler {
 }
 
 func init() {
-	http.Handle("/", &webhandler{rootHandler, true})
+	http.Handle("/", &webhandler{rootHandler, true, 0})
 	http.Handle("/static/", maxAgeHandler(conf_statictimeout(), http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
-	http.Handle("/zapfen/", &webhandler{zapfenHandler, true})
-	http.Handle("/division/", &webhandler{divisionHandler, true})
+	http.Handle("/static/page/", &webhandler{staticHTMLPageHandler, true, conf_statictimeout()})
+	http.Handle("/zapfen/", &webhandler{zapfenHandler, true, 0})
+	http.Handle("/division/", &webhandler{divisionHandler, true, 0})
 }
