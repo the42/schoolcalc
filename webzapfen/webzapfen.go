@@ -25,14 +25,15 @@ import (
 )
 
 const (
-	roottplfilename  = "root.tpl"
-	indextplfilename = "index.tpl"
-	divisionfilename = "division.tpl"
-	zapfenfilename   = "zapfen.tpl"
-	defaultlang      = "en"
-	cookie_lang      = "uilang"
-	setlanguageparam = "setlanguage"
-	redirectparam    = "redirect"
+	roottplfilename   = "root.tpl"
+	indextplfilename  = "index.tpl"
+	divisionfilename  = "division.tpl"
+	zapfenfilename    = "zapfen.tpl"
+	excersisefilename = "excercise.tpl"
+	defaultlang       = "en"
+	cookie_lang       = "uilang"
+	setlanguageparam  = "setlanguage"
+	redirectparam     = "redirect"
 )
 
 type menulayout struct {
@@ -42,20 +43,15 @@ type menulayout struct {
 
 var menustructure = []menulayout{
 	{"/", map[string]string{"de": "Home", "en": "Home"}},
-	{"/division/", map[string]string{"de": "Division", "en": "Division"}},
-	{"/zapfen/", map[string]string{"de": "Webzapfen", "en": "zopfen"}},
+	{"/excercise", map[string]string{"de": "Übungen", "en": "Excercises"}},
+	{"/division", map[string]string{"de": "Division", "en": "Division"}},
+	{"/zapfen", map[string]string{"de": "Webzapfen", "en": "zopfen"}},
 }
 
 type webhandler struct {
 	handler      func(w io.Writer, req *http.Request, lang string) error
 	compress     bool
 	seccachetime int
-}
-
-type rootPage struct {
-	Error    []string
-	CurrLang string
-	URL      string
 }
 
 func langselector(currlang string) template.HTML {
@@ -85,6 +81,12 @@ func rendermenu(currlang, url string) template.HTML {
 	return template.HTML(htmlString)
 }
 
+type rootPage struct {
+	Error    []string
+	CurrLang string
+	URL      string
+}
+
 var templrootfuncMap = template.FuncMap{
 	"langselector": langselector,
 	"rendermenu":   rendermenu,
@@ -95,7 +97,7 @@ func rootHandler(w io.Writer, req *http.Request, lang string) error {
 	var tpl *template.Template
 	var err error
 
-	page := &rootPage{CurrLang: lang, URL: req.URL.String()}
+	page := &rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}
 
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("DivisionSetup").Funcs(templrootfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+indextplfilename)
@@ -177,7 +179,7 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 	dividend := strings.TrimSpace(req.URL.Query().Get("dividend"))
 	divisor := strings.TrimSpace(req.URL.Query().Get("divisor"))
 
-	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true, rootPage: rootPage{CurrLang: lang, URL: req.URL.String()}}
+	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true, rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}}
 
 	prec := 0
 	page.Precision = strings.TrimSpace(req.URL.Query().Get("prec"))
@@ -301,7 +303,7 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	var tpl *template.Template
 	var err error
 
-	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), rootPage: rootPage{CurrLang: lang, URL: req.URL.String()}}
+	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}}
 
 	for retry := 0; retry <= 1; retry++ {
 		tpl, err = template.New("DivisionSetup").Funcs(templzapfenfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+zapfenfilename)
@@ -336,12 +338,68 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
+type ExcersiseLevel byte
+const (
+	ExcersiseLevel_Beginner ExcersiseLevel = 1
+	ExcersiseLevel_Apprentice
+	ExcersiseLevel_Sophomore
+	ExcersiseLevel_Advanced
+	ExcersiseLevel_Master
+)
+
+type excersisePage struct {
+	rootPage
+	MinDividend, MaxDividend,
+	MinDivisor, MaxDivisor string
+	MaxDigitisPastPointUntilZero string
+	NumberofExcersises           string
+	Level                        ExcersiseLevel
+}
+
+func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
+	var tpl *template.Template
+	var err error
+
+	mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
+	maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
+
+	mindivisor := strings.TrimSpace(req.URL.Query().Get("mindivisor"))
+	maxdivisor := strings.TrimSpace(req.URL.Query().Get("maxdivisor"))
+
+	numberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
+	maxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
+
+	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)},
+		MinDividend:                  mindividend,
+		MaxDividend:                  maxdividend,
+		MinDivisor:                   mindivisor,
+		MaxDivisor:                   maxdivisor,
+		NumberofExcersises:           numberofexcersises,
+		MaxDigitisPastPointUntilZero: maxdigitispastpointuntilzero,
+	}
+
+	for retry := 0; retry <= 1; retry++ {
+		tpl, err = template.New("DivisionSetup").Funcs(templzapfenfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+excersisefilename)
+		if err != nil {
+			if os.IsNotExist(err) && retry < 1 {
+				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+				log.Printf(errstring)
+				page.Error = append(page.Error, errstring)
+				lang = defaultlang
+			} else {
+				panic(err)
+			}
+		}
+	}
+	return tpl.Execute(w, page)
+}
+
 func staticHTMLPageHandler(w io.Writer, req *http.Request, lang string) error {
 
 	var tpl *template.Template
 	var err error
 
-	page := &rootPage{CurrLang: lang, URL: req.URL.String()}
+	page := &rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}
 
 	directory := path.Dir(req.URL.Path)
 	file := path.Base(req.URL.Path)
@@ -478,7 +536,8 @@ func maxAgeHandler(seconds int, h http.Handler) http.Handler {
 func init() {
 	http.Handle("/", &webhandler{rootHandler, true, 0})
 	http.Handle("/static/", maxAgeHandler(conf_statictimeout(), http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
-	http.Handle("/static/page/", &webhandler{staticHTMLPageHandler, true, conf_statictimeout()})
+	http.Handle("/pages/", &webhandler{staticHTMLPageHandler, true, conf_statictimeout()})
 	http.Handle("/zapfen/", &webhandler{zapfenHandler, true, 0})
 	http.Handle("/division/", &webhandler{divisionHandler, true, 0})
+	http.Handle("/excercise/", &webhandler{excersiseHandler, true, 0})
 }
