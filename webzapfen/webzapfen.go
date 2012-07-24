@@ -43,9 +43,9 @@ type menulayout struct {
 
 var menustructure = []menulayout{
 	{"/", map[string]string{"de": "Home", "en": "Home"}},
-	{"/excercise", map[string]string{"de": "Übungen", "en": "Excercises"}},
-	{"/division", map[string]string{"de": "Division", "en": "Division"}},
-	{"/zapfen", map[string]string{"de": "Webzapfen", "en": "zopfen"}},
+	{"/excercise/", map[string]string{"de": "Übungen", "en": "Excercises"}},
+	{"/division/", map[string]string{"de": "Division", "en": "Division"}},
+	{"/zapfen/", map[string]string{"de": "Webzapfen", "en": "zopfen"}},
 }
 
 type webhandler struct {
@@ -92,27 +92,37 @@ var templrootfuncMap = template.FuncMap{
 	"rendermenu":   rendermenu,
 }
 
-func rootHandler(w io.Writer, req *http.Request, lang string) error {
+func loadTemplate(templatename string, funcs template.FuncMap, patterns []string, rootTemplate, detailedTemplate string) (tpl *template.Template, lidx int, err error) {
 
-	var tpl *template.Template
-	var err error
+	for idx, pattern := range patterns {
+		lidx = idx
+		detailedfile := fmt.Sprintf(detailedTemplate, pattern)
+		tpl, err = template.New(templatename).Funcs(funcs).ParseFiles(rootTemplate, detailedfile)
 
-	page := &rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}
-
-	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("DivisionSetup").Funcs(templrootfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+indextplfilename)
-		if err != nil {
-			if os.IsNotExist(err) && retry < 1 {
-				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
-				log.Printf(errstring)
-				page.Error = append(page.Error, errstring)
-				lang = defaultlang
-			} else {
-				panic(err)
-			}
+		if err == nil {
+			break
+		} else if !os.IsNotExist(err) {
+			panic(err)
 		}
 	}
+	return
+}
 
+func rootHandler(w io.Writer, req *http.Request, lang string) error {
+
+	page := &rootPage{CurrLang: lang, URL: req.URL.Path}
+	languages := []string{lang, defaultlang}
+
+	tpl, idx, err := loadTemplate("DivisionSetup", templrootfuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+indextplfilename)
+
+	if err != nil {
+		panic(err)
+	}
+	if idx > 0 {
+		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+		log.Printf(errstring)
+		page.Error = append(page.Error, errstring)
+	}
 	return tpl.Execute(w, page)
 }
 
@@ -173,13 +183,10 @@ var templdivfuncMap = template.FuncMap{
 
 func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 
-	var tpl *template.Template
-	var err error
-
 	dividend := strings.TrimSpace(req.URL.Query().Get("dividend"))
 	divisor := strings.TrimSpace(req.URL.Query().Get("divisor"))
 
-	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true, rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}}
+	page := &divisionPage{Dividend: dividend, Divisor: divisor, Boxed: true, StopRemz: true, rootPage: rootPage{CurrLang: lang, URL: req.URL.Path}}
 
 	prec := 0
 	page.Precision = strings.TrimSpace(req.URL.Query().Get("prec"))
@@ -204,18 +211,17 @@ func divisionHandler(w io.Writer, req *http.Request, lang string) error {
 		}
 	}
 
-	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("DivisionSetup").Funcs(templdivfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+divisionfilename)
-		if err != nil {
-			if os.IsNotExist(err) && retry < 1 {
-				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
-				log.Printf(errstring)
-				page.Error = append(page.Error, errstring)
-				lang = defaultlang
-			} else {
-				panic(err)
-			}
-		}
+	languages := []string{lang, defaultlang}
+
+	tpl, idx, err := loadTemplate("DivisionSetup", templdivfuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+divisionfilename)
+
+	if err != nil {
+		panic(err)
+	}
+	if idx > 0 {
+		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+		log.Printf(errstring)
+		page.Error = append(page.Error, errstring)
 	}
 
 	func() {
@@ -300,23 +306,18 @@ var templzapfenfuncMap = template.FuncMap{
 
 func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 
-	var tpl *template.Template
-	var err error
+	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), rootPage: rootPage{CurrLang: lang, URL: req.URL.Path}}
+	languages := []string{lang, defaultlang}
 
-	page := &zapfenPage{Number: strings.TrimSpace(req.URL.Query().Get("number")), rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}}
+	tpl, idx, err := loadTemplate("DivisionSetup", templzapfenfuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+zapfenfilename)
 
-	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("DivisionSetup").Funcs(templzapfenfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+zapfenfilename)
-		if err != nil {
-			if os.IsNotExist(err) && retry < 1 {
-				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
-				log.Printf(errstring)
-				page.Error = append(page.Error, errstring)
-				lang = defaultlang
-			} else {
-				panic(err)
-			}
-		}
+	if err != nil {
+		panic(err)
+	}
+	if idx > 0 {
+		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+		log.Printf(errstring)
+		page.Error = append(page.Error, errstring)
 	}
 
 	if len(page.Number) >= 1 {
@@ -339,6 +340,7 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 }
 
 type ExcersiseLevel byte
+
 const (
 	ExcersiseLevel_Beginner ExcersiseLevel = 1
 	ExcersiseLevel_Apprentice
@@ -357,8 +359,6 @@ type excersisePage struct {
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
-	var tpl *template.Template
-	var err error
 
 	mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
 	maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
@@ -369,7 +369,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	numberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
 	maxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
 
-	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)},
+	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
 		MinDividend:                  mindividend,
 		MaxDividend:                  maxdividend,
 		MinDivisor:                   mindivisor,
@@ -378,49 +378,36 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		MaxDigitisPastPointUntilZero: maxdigitispastpointuntilzero,
 	}
 
-	for retry := 0; retry <= 1; retry++ {
-		tpl, err = template.New("DivisionSetup").Funcs(templzapfenfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+lang+"."+excersisefilename)
-		if err != nil {
-			if os.IsNotExist(err) && retry < 1 {
-				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
-				log.Printf(errstring)
-				page.Error = append(page.Error, errstring)
-				lang = defaultlang
-			} else {
-				panic(err)
-			}
-		}
+	languages := []string{lang, defaultlang}
+	tpl, idx, err := loadTemplate("DivisionSetup", templrootfuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+excersisefilename)
+
+	if err != nil {
+		panic(err)
 	}
+	if idx > 0 {
+		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+		log.Printf(errstring)
+		page.Error = append(page.Error, errstring)
+	}
+
 	return tpl.Execute(w, page)
 }
 
 func staticHTMLPageHandler(w io.Writer, req *http.Request, lang string) error {
 
-	var tpl *template.Template
-	var err error
+	page := &rootPage{CurrLang: lang, URL: req.URL.Path}
+	languages := []string{lang, defaultlang}
 
-	page := &rootPage{CurrLang: lang, URL: path.Dir(req.URL.Path)}
+	tpl, idx, err := loadTemplate("DivisionSetup", templrootfuncMap, languages, conf_roottemplatedir()+roottplfilename, "."+path.Dir(req.URL.Path)+"/%s."+path.Base(req.URL.Path))
 
-	directory := path.Dir(req.URL.Path)
-	file := path.Base(req.URL.Path)
-
-	for retry := 0; retry <= 1; retry++ {
-
-		detailedfile := "." + directory + "/" + lang + "." + file
-
-		tpl, err = template.New("DivisionSetup").Funcs(templrootfuncMap).ParseFiles(conf_roottemplatedir()+roottplfilename, detailedfile)
-		if err != nil {
-			if os.IsNotExist(err) && retry < 1 {
-				errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
-				log.Printf(errstring)
-				page.Error = append(page.Error, errstring)
-				lang = defaultlang
-			} else {
-				panic(err)
-			}
-		}
+	if err != nil {
+		panic(err)
 	}
-
+	if idx > 0 {
+		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
+		log.Printf(errstring)
+		page.Error = append(page.Error, errstring)
+	}
 	return tpl.Execute(w, page)
 }
 
