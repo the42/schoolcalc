@@ -355,10 +355,26 @@ type excersisePage struct {
 	MinDivisor, MaxDivisor string
 	MaxDigitisPastPointUntilZero string
 	NumberofExcersises           string
-	Level                        ExcersiseLevel
+	Level                        string
+}
+
+func setOptionSelected(setval, compval, displaystring string) template.HTML {
+	var selected string
+	if setval == compval {
+		selected = ` selected="selected"`
+	}
+	return template.HTML(`<option value="` + setval + `"` + selected + ">" + displaystring + "</option>")
+}
+
+var excercisefuncMap = template.FuncMap{
+	"langselector":      langselector,
+	"rendermenu":        rendermenu,
+	"setOptionSelected": setOptionSelected,
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
+
+	level := strings.TrimSpace(req.URL.Query().Get("level"))
 
 	mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
 	maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
@@ -370,6 +386,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	maxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
 
 	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
+		Level:                        level,
 		MinDividend:                  mindividend,
 		MaxDividend:                  maxdividend,
 		MinDivisor:                   mindivisor,
@@ -379,7 +396,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	}
 
 	languages := []string{lang, defaultlang}
-	tpl, idx, err := loadTemplate("DivisionSetup", templrootfuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+excersisefilename)
+	tpl, idx, err := loadTemplate("DivisionSetup", excercisefuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+excersisefilename)
 
 	if err != nil {
 		panic(err)
