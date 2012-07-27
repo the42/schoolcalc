@@ -274,7 +274,7 @@ func tplfunczapfendisplay(zapfen *schoolcalc.Zapfen, steps [8]*schoolcalc.SDivid
 		for i := 0; i < 8; i++ {
 			retstring += fmt.Sprintf("\n<tr>\n  <td class='zapfendividend'><a href='javascript:void(0);' class='zapfendividenditem emptylink' id='zapfendividenditem%d'>%s</a></td><td>:</td><td>%d</td><td>=</td><td>%s</td>\n</tr>\n", i, input, i+2, zapfen.Divzapfen[i])
 
-			var divisorintermed string = ""
+			var divisorintermed string
 
 			for dividendcolums := 0; dividendcolums < len(steps[i].NormalizedDividend); dividendcolums++ {
 
@@ -353,46 +353,62 @@ type excersisePage struct {
 	rootPage
 	MinDividend, MaxDividend,
 	MinDivisor, MaxDivisor string
-	MaxDigitisPastPointUntilZero string
-	NumberofExcersises           string
-	Level                        string
+	MaxDigitisPastPointUntilZero int
+	NumberofExcersises           int
+	Level                        ExcersiseLevel
 }
 
-func setOptionSelected(setval, compval, displaystring string) template.HTML {
+func setLevelOptionSelected(setval, compval ExcersiseLevel, displaystring string) template.HTML {
 	var selected string
 	if setval == compval {
 		selected = ` selected="selected"`
 	}
-	return template.HTML(`<option value="` + setval + `"` + selected + ">" + displaystring + "</option>")
+	return template.HTML(`<option value="` + strconv.Itoa(int(setval)) + `"` + selected + ">" + displaystring + "</option>")
 }
 
 var excercisefuncMap = template.FuncMap{
-	"langselector":      langselector,
-	"rendermenu":        rendermenu,
-	"setOptionSelected": setOptionSelected,
+	"langselector":           langselector,
+	"rendermenu":             rendermenu,
+	"setLevelOptionSelected": setLevelOptionSelected,
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
-
-	level := strings.TrimSpace(req.URL.Query().Get("level"))
-
 	mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
 	maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
 
 	mindivisor := strings.TrimSpace(req.URL.Query().Get("mindivisor"))
 	maxdivisor := strings.TrimSpace(req.URL.Query().Get("maxdivisor"))
 
-	numberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
-	maxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
-
 	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
-		Level:                        level,
-		MinDividend:                  mindividend,
-		MaxDividend:                  maxdividend,
-		MinDivisor:                   mindivisor,
-		MaxDivisor:                   maxdivisor,
-		NumberofExcersises:           numberofexcersises,
-		MaxDigitisPastPointUntilZero: maxdigitispastpointuntilzero,
+		MinDividend: mindividend,
+		MaxDividend: maxdividend,
+		MinDivisor:  mindivisor,
+		MaxDivisor:  maxdivisor,
+	}
+
+	strlevel := strings.TrimSpace(req.URL.Query().Get("level"))
+	if len(strlevel) > 0 {
+		if level, err := strconv.Atoi(strlevel); err == nil {
+			page.Level = ExcersiseLevel(level)
+		} else {
+			page.Error = append(page.Error, fmt.Sprintf("Parameter 'level' tainted: %s", err))
+		}
+	}
+	strnumberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
+	if len(strnumberofexcersises) > 0 {
+		if numberofexcersises, err := strconv.Atoi(strnumberofexcersises); err == nil {
+			page.NumberofExcersises = numberofexcersises
+		} else {
+			page.Error = append(page.Error, fmt.Sprintf("Parameter 'n' tainted: %s", err))
+		}
+	}
+	strmaxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
+	if len(strmaxdigitispastpointuntilzero) > 0 {
+		if maxdigitispastpointuntilzero, err := strconv.Atoi(strmaxdigitispastpointuntilzero); err == nil {
+			page.MaxDigitisPastPointUntilZero = maxdigitispastpointuntilzero
+		} else {
+			page.Error = append(page.Error, fmt.Sprintf("Parameter 'numremz' tainted: %s", err))
+		}
 	}
 
 	languages := []string{lang, defaultlang}

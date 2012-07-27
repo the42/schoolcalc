@@ -5,12 +5,12 @@
   <form>
     <p>
       <select name="level">
-        {{setOptionSelected "0" .Level "Select excercise level..."}}
-        {{setOptionSelected "1" .Level "Beginner"}}
-        {{setOptionSelected "2" .Level "Apprentice"}}
-        {{setOptionSelected "3" .Level "Sophomore"}}
-        {{setOptionSelected "4" .Level "Advanced"}}
-        {{setOptionSelected "5" .Level "Master"}}
+        {{setLevelOptionSelected 0 .Level "Select excercise level..."}}
+        {{setLevelOptionSelected 1 .Level "Beginner"}}
+        {{setLevelOptionSelected 2 .Level "Apprentice"}}
+        {{setLevelOptionSelected 3 .Level "Sophomore"}}
+        {{setLevelOptionSelected 4 .Level "Advanced"}}
+        {{setLevelOptionSelected 5 .Level "Master"}}
       </select>
     </p>
     <p>
