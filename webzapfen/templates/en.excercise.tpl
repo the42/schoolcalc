@@ -3,29 +3,53 @@
     <h1>Excersises</h1>
   </header>
   <form>
-    <p>
-      <select name="level">
-        {{setLevelOptionSelected 0 .Level "Select excercise level..."}}
-        {{setLevelOptionSelected 1 .Level "Beginner"}}
-        {{setLevelOptionSelected 2 .Level "Apprentice"}}
-        {{setLevelOptionSelected 3 .Level "Sophomore"}}
-        {{setLevelOptionSelected 4 .Level "Advanced"}}
-        {{setLevelOptionSelected 5 .Level "Master"}}
-      </select>
-    </p>
-    <p>
-      Number of Excersises:  <input type="text" name="n" value="{{.NumberofExcersises}}" autofocus="true"/> 
-    </p>
-    <p>
-      Minimum Dividend: <input type="text" name="mindividend" value="{{.MinDividend}}" />
-      Maximum Dividend: <input type="text" name="maxdividend" value="{{.MaxDividend}}"/>
-    </p>
-    <p>
-      Minimum Divisor: <input type="text" name="mindivisor" value="{{.MinDivisor}}" />
-      Maximum Dividend: <input type="text" name="maxdivisor" value="{{.MaxDivisor}}" />
-    </p>
-    <p>
-      Number of Remainders past point:  <input type="text" name="numremz" value="{{.MaxDigitisPastPointUntilZero}}" /> 
-    </p>
+    <div>
+      <p>
+	<select name="level">
+	  {{setLevelOptionSelected 0 .Level "Select excercise level..."}}
+	  {{setLevelOptionSelected 1 .Level "Beginner"}}
+	  {{setLevelOptionSelected 2 .Level "Apprentice"}}
+	  {{setLevelOptionSelected 3 .Level "Sophomore"}}
+	  {{setLevelOptionSelected 4 .Level "Advanced"}}
+	  {{setLevelOptionSelected 5 .Level "Master"}}
+	</select>
+      </p>
+      <p>
+	Number of Excersises:  <input type="text" name="n" value="{{.NumberofExcersises}}" autofocus="true"/> 
+      </p>
+      <p>
+	<a href="#" id='togglevisibility' ></a>
+      </p>
+    </div>
+    <div id="excercisedetails">
+      <p>
+	Minimum Dividend: <input type="text" name="mindividend" value="{{.MinDividend}}" />
+	Maximum Dividend: <input type="text" name="maxdividend" value="{{.MaxDividend}}"/>
+      </p>
+      <p>
+	Minimum Divisor: <input type="text" name="mindivisor" value="{{.MinDivisor}}" />
+	Maximum Dividend: <input type="text" name="maxdivisor" value="{{.MaxDivisor}}" />
+      </p>
+      <p>
+	Number of Remainders past point:  <input type="text" name="numremz" value="{{.MaxDigitisPastPointUntilZero}}" /> 
+      </p>
+    </div>
     <input type="submit" value="Submit" />
-  </form>{{end}}
+  </form>
+  <script type="text/javascript">
+    function alterVisibility() {
+      var area = document.getElementById('excercisedetails');
+      var button = document.getElementById('togglevisibility');
+      if ( getComputedStyle(area).getPropertyValue('display') == 'none') {
+        area.style.display = 'block';
+        button.innerHTML = "Hide details";
+      } else {
+        area.style.display = 'none';
+        button.innerHTML = "Show details";
+      }
+    }
+
+    var buttonvisiblearea = document.getElementById('togglevisibility')
+    buttonvisiblearea.innerHTML="Hide details"
+    buttonvisiblearea.addEventListener('click', alterVisibility);
+  </script>{{end}}
