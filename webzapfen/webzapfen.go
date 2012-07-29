@@ -401,6 +401,8 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		} else {
 			page.Error = append(page.Error, fmt.Sprintf("Parameter 'n' tainted: %s", err))
 		}
+	} else {
+		page.NumberofExcersises = 1
 	}
 	strmaxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
 	if len(strmaxdigitispastpointuntilzero) > 0 {
