@@ -55,19 +55,11 @@
 	  <h3>Digit Range</h3>
 	  <p>
 	    <label for="divisornumrange">Rounded divisor contains</label>
-	    <select name="divisornumrange" id="divisornumrange" class="changeexcercisedetail">
-	      {{setStrOptionSelected "250" .DivisorNumRange "digits 2, 5 and 0"}}
-	      {{setStrOptionSelected "2543680" .DivisorNumRange "digits 2, 5, 4, 3, 6, 8 and 0"}}
-	      {{setStrOptionSelected "\\d" .DivisorNumRange "all digits"}}
-	    </select>
+	    <input type="text" class="excercisedetail" id="divisornumrange" name="divisornumrange" value="{{.DivisorNumRange}}" size="6"/>
 	  </p>
 	  <p>
 	    <label for="dividendnumrange">Dividend contains</label>
-	    <select name="dividendnumrange" id="dividendnumrange" class="changeexcercisedetail">
-	      {{setStrOptionSelected "[0..5]" .DividendNumRange "digits from zero upto 5"}}
-	      {{setStrOptionSelected "[6..9]" .DividendNumRange "digits from 6 upto 9"}}
-	      {{setStrOptionSelected "\\d" .DividendNumRange "all digits"}}
-	    </select>
+	    <input type="text" class="excercisedetail" id="dividendnumrange" name="dividendnumrange" value="{{.DividendNumRange}}" size="6"/>
 	  </p>
         </div>
       </section>
