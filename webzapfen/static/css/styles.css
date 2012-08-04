@@ -61,11 +61,11 @@ p {
 	
 a, p a {
 	text-decoration: underline;
-	color: white;
+	color: red;
 }
 	
 a:hover {
-   color: white;
+   color: red;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -417,6 +417,31 @@ nav ul li a.current {
 	position: relative;
 	top: 1px;
 }
+
+
+/***************************************************
+				   Form fields
+***************************************************/
+
+.inputArea
+{
+    // font-family: Arial, Sans-Serif;
+    // font-size: 13px;
+    background-color: #d6e5f4;
+    padding: 10px;
+}
+
+.inputArea input[type="text"], .inputArea textarea
+{
+    // font-family: Arial, Sans-Serif;
+    // font-size: 13px;
+    margin-bottom: 5px;
+    display: block;
+    padding: 4px;
+    border: solid 1px #85b1de;
+    width: 150px;
+}
+
 
 /***************************************************
 				   DIVISION

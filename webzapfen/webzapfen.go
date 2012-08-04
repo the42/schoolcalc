@@ -339,61 +339,65 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
-type ExcersiseLevel byte
-
-const (
-	ExcersiseLevel_Beginner ExcersiseLevel = 1
-	ExcersiseLevel_Apprentice
-	ExcersiseLevel_Sophomore
-	ExcersiseLevel_Advanced
-	ExcersiseLevel_Master
-)
-
 type excersisePage struct {
 	rootPage
-	MinDividend, MaxDividend,
-	MinDivisor, MaxDivisor string
-	MaxDigitisPastPointUntilZero int
-	NumberofExcersises           int
-	Level                        ExcersiseLevel
+	DividendRange, DivisorRange       string
+	MaxDigitisPastPointUntilZero      int
+	NumberofExcersises                int
+	Level                             int
+	SignDividend, SignDivisor         int
+	DivisorNumRange, DividendNumRange string
 }
 
-func setLevelOptionSelected(setval, compval ExcersiseLevel, displaystring string) template.HTML {
+func setIntOptionSelected(setval, compval int, displaystring string) template.HTML {
 	var selected string
 	if setval == compval {
 		selected = ` selected="selected"`
 	}
-	return template.HTML(`<option value="` + strconv.Itoa(int(setval)) + `"` + selected + ">" + displaystring + "</option>")
+	return template.HTML(`<option value="` + strconv.Itoa(setval) + `"` + selected + ">" + displaystring + "</option>")
+}
+
+func setStrOptionSelected(setval, compval string, displaystring string) template.HTML {
+	var selected string
+	if setval == compval {
+		selected = ` selected="selected"`
+	}
+	return template.HTML(`<option value="` + setval + `"` + selected + ">" + displaystring + "</option>")
 }
 
 var excercisefuncMap = template.FuncMap{
-	"langselector":           langselector,
-	"rendermenu":             rendermenu,
-	"setLevelOptionSelected": setLevelOptionSelected,
+	"langselector":         langselector,
+	"rendermenu":           rendermenu,
+	"setIntOptionSelected": setIntOptionSelected,
+	"setStrOptionSelected": setStrOptionSelected,
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
-	mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
-	maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
+	/*
+		mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
+		maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
 
-	mindivisor := strings.TrimSpace(req.URL.Query().Get("mindivisor"))
-	maxdivisor := strings.TrimSpace(req.URL.Query().Get("maxdivisor"))
+		mindivisor := strings.TrimSpace(req.URL.Query().Get("mindivisor"))
+		maxdivisor := strings.TrimSpace(req.URL.Query().Get("maxdivisor"))
+	*/
+	level, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("level")))
+
+	dividendrange := strings.TrimSpace(req.URL.Query().Get("dividendrange"))
+	signdividend, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdividend")))
+
+	divisorrange := strings.TrimSpace(req.URL.Query().Get("divisorrange"))
+	signdivisor, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdivisor")))
+
+	divisornumrange := strings.TrimSpace(req.URL.Query().Get("divisornumrange"))
+	dividendnumrange := strings.TrimSpace(req.URL.Query().Get("dividendnumrange"))
 
 	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
-		MinDividend: mindividend,
-		MaxDividend: maxdividend,
-		MinDivisor:  mindivisor,
-		MaxDivisor:  maxdivisor,
+		Level:         level,
+		DividendRange: dividendrange, DivisorRange: divisorrange,
+		DividendNumRange: dividendnumrange, DivisorNumRange: divisornumrange,
+		SignDividend: signdividend, SignDivisor: signdivisor,
 	}
 
-	strlevel := strings.TrimSpace(req.URL.Query().Get("level"))
-	if len(strlevel) > 0 {
-		if level, err := strconv.Atoi(strlevel); err == nil {
-			page.Level = ExcersiseLevel(level)
-		} else {
-			page.Error = append(page.Error, fmt.Sprintf("Parameter 'level' tainted: %s", err))
-		}
-	}
 	strnumberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
 	if len(strnumberofexcersises) > 0 {
 		if numberofexcersises, err := strconv.Atoi(strnumberofexcersises); err == nil {
