@@ -4,13 +4,16 @@
   </header>
   <form>
     <p>
-      Dividend: <input type="text" name="dividend" value="{{.Dividend}}" autofocus="true"/>
-      Divisor: <input type="text" name="divisor" value="{{.Divisor}}" />
+      <input type="text" name="dividend" value="{{.Dividend}}" autofocus="true"/> : <input type="text" name="divisor" value="{{.Divisor}}" />
       <input type="submit" value="Submit" />
     </p>
     <p>
       Precision: <input type="text" name="prec" value="{{.Precision}}" />
+    </p>
+    <p>
       Continue calculating until precision, even if remainder is already zero <input type="checkbox" id="submitprec" name="stopremz" value="false"{{if not .StopRemz}} checked="checked"{{end}}/>
+    </p>
+    <p>
       Display boxes are off <input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/>
     </p>
   </form>{{if .SDivide}}
