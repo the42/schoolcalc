@@ -327,7 +327,7 @@ nav ul li a {
 	background-color: transparent;
 	margin-top: 5px;
 	margin-right: 6px;
-   text-decoration: none;
+	text-decoration: none;
 }
 
 nav ul li a:hover {
@@ -423,18 +423,19 @@ nav ul li a.current {
 				   Form fields
 ***************************************************/
 
+/* from http://www.jankoatwarpspeed.com/post/2008/07/27/Enhance-your-input-fields-with-simple-CSS-tricks.aspx */
 .inputArea
 {
-    // font-family: Arial, Sans-Serif;
-    // font-size: 13px;
-    background-color: #d6e5f4;
+    /* font-family: Arial, Sans-Serif; */
+    /* font-size: 13px; */
+    /* background-color: #d6e5f4; */
     padding: 10px;
 }
 
 .inputArea input[type="text"], .inputArea textarea
 {
-    // font-family: Arial, Sans-Serif;
-    // font-size: 13px;
+    /* font-family: Arial, Sans-Serif; */
+    /* font-size: 13px; */
     margin-bottom: 5px;
     display: block;
     padding: 4px;
