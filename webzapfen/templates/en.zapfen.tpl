@@ -3,7 +3,7 @@
     <h1>Webzapfen</h1>
   </header>
   <form>
-    Number: <input type="text" name="number" value="{{.Number}}" autofocus="true"/>
+    <label for="number">Number: </label><input type="text" name="number" id="number" value="{{.Number}}" autofocus="true"/>
     <input type="submit" value="Submit" />
   </form>{{if .Zapfen}}
   <button id='toggleallintermedsteps' >Toggle</button> display of intermediate division steps

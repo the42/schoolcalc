@@ -8,13 +8,13 @@
       <input type="submit" value="Submit" />
     </p>
     <p>
-      Precision: <input type="text" name="prec" value="{{.Precision}}" />
+      <label for="prec">Precision: </label><input type="text" name="prec" id="prec" value="{{.Precision}}" />
     </p>
     <p>
-      Continue calculating until precision, even if remainder is already zero <input type="checkbox" id="submitprec" name="stopremz" value="false"{{if not .StopRemz}} checked="checked"{{end}}/>
+      <label for="submitprec">Continue calculating until precision, even if remainder is already zero </label><input type="checkbox" id="submitprec" name="stopremz" value="false"{{if not .StopRemz}} checked="checked"{{end}}/>
     </p>
     <p>
-      Display boxes are off <input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/>
+      <label for="boxedresult">Display boxes are off </label><input type="checkbox" id="boxedresult" name="boxed" value="false"{{if not .Boxed}} checked="checked"{{end}}/>
     </p>
   </form>{{if .SDivide}}
   <div class="divisionOutputArea">
