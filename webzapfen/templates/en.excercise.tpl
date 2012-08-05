@@ -4,7 +4,7 @@
   </header>
   <form>
     <p>
-      <label for="levelsetter">Difficulty level<label>
+      <label for="levelsetter">Difficulty level</label>
       <select name="level" id="levelsetter">
 	{{setIntOptionSelected 0 .Level "Select excercise level..."}}
 	{{setIntOptionSelected 1 .Level "Beginner"}}
@@ -16,7 +16,7 @@
     </p>
     <p>
       <label for="n">Number of Excersises:</label>
-      <input type="text" name="n" value="{{.NumberofExcersises}}" id="n" size="2" autofocus="true"/> 
+      <input type="text" name="n" value="{{.NumberofExcersises}}" id="n" pattern="\d+" title="a number" size="2" autofocus="true"/> 
     </p>
     <p>
       <input type="submit" value="Submit"/>
@@ -30,7 +30,7 @@
 	  <h3>Dividend/Divisor Size</h3>
 	  <p>
 	    <label for="dividendrange">Range of digits in dividend</label>
-	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" value="{{.DividendRange}}" size="6"/>
+	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" pattern="\d+(-\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DividendRange}}" size="6"/>
 	    <label for="signdividend">Sign of dividend</label>
 	    <select name="signdividend" id="signdividend" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDividend "positive"}}
@@ -40,7 +40,7 @@
 	  </p>
 	  <p>
 	    <label for="divisorrange">Range of digits in divisor</label>
-	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" value="{{.DivisorRange}}" size="6"/>
+	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" pattern="\d+(-\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DivisorRange}}" size="6"/>
 	    <label for="signdivisor">Sign of divisor</label>
 	    <select name="signdivisor" id="signdivisor" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDivisor "positive"}}
@@ -54,12 +54,24 @@
         <div class="inputArea">
 	  <h3>Digit Range</h3>
 	  <p>
-	    <label for="divisornumrange">Rounded divisor contains</label>
-	    <input type="text" class="excercisedetail" id="divisornumrange" name="divisornumrange" value="{{.DivisorNumRange}}" size="6"/>
+	    <label for="divisornumrange">Rounded divisor consists of digits</label>
+	    <input type="text" name="divisornumrange" id="divisornumrange" pattern="\d(,\d)*" title="digits, separated by comma, eg. 1,3" list="predivisornumrange" value="{{.DivisorNumRange}}"/>
+	    <datalist id="predivisornumrange">
+	      <option value="0,2,5">The digits 2, 5 and zero</option>
+	      <option value="0,2,5,4,3,6,8">The digits 2, 5 and zero</option>
+	      <option value="0,1,2,3,4,5,6,7,8,9">All digits</option>
+	      <option>Enter digits ...</option>
+	    </datalist>
 	  </p>
 	  <p>
 	    <label for="dividendnumrange">Dividend contains</label>
-	    <input type="text" class="excercisedetail" id="dividendnumrange" name="dividendnumrange" value="{{.DividendNumRange}}" size="6"/>
+	    <input type="text" name="dividendnumrange" id="dividendnumrange" pattern="\d(,\d)*" title="digits, separated by comma, eg. 1,3" list="predividendnumrange" value="{{.DividendNumRange}}"/>
+	    <datalist id="predividendnumrange">
+	      <option value="0,1,2,3,4,5">The digits upto 5 and zero</option>
+	      <option value="6,7,8,9,0">The digits greater than 5 and zero</option>
+	      <option value="0,1,2,3,4,5,6,7,8,9">All digits</option>
+	      <option>Enter digits ...</option>
+	    </datalist>
 	  </p>
         </div>
       </section>
@@ -68,7 +80,7 @@
 	  <h3>Decimal Places</h3>
 	  <p>
 	    <label for="numremz">Number of decimal places</label>
-	    <input type="text" class="excercisedetail" name="numremz" id="numremz" value="{{.MaxDigitisPastPointUntilZero}}" size="10"/> 
+	    <input type="text" class="excercisedetail" name="numremz" id="numremz" pattern="\d*" title="only numbers allowed" value="{{.MaxDigitisPastPointUntilZero}}" size="10"/> 
 	  </p>
         </div>
       </section>

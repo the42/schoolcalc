@@ -373,13 +373,6 @@ var excercisefuncMap = template.FuncMap{
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
-	/*
-		mindividend := strings.TrimSpace(req.URL.Query().Get("mindividend"))
-		maxdividend := strings.TrimSpace(req.URL.Query().Get("maxdividend"))
-
-		mindivisor := strings.TrimSpace(req.URL.Query().Get("mindivisor"))
-		maxdivisor := strings.TrimSpace(req.URL.Query().Get("maxdivisor"))
-	*/
 	level, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("level")))
 
 	dividendrange := strings.TrimSpace(req.URL.Query().Get("dividendrange"))
