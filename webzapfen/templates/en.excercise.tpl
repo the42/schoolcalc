@@ -54,23 +54,23 @@
         <div class="inputArea">
 	  <h3>Digit Range</h3>
 	  <p>
-	    <label for="divisornumrange">Rounded divisor consists of digits</label>
+	    <label for="divisornumrange">Rounded divisor consists of</label>
 	    <input type="text" name="divisornumrange" id="divisornumrange" pattern="\d(,\d)*" title="digits, separated by comma, eg. 1,3" list="predivisornumrange" value="{{.DivisorNumRange}}"/>
 	    <datalist id="predivisornumrange">
-	      <option value="0,2,5">The digits 2, 5 and zero</option>
-	      <option value="0,2,5,4,3,6,8">The digits 2, 5 and zero</option>
-	      <option value="0,1,2,3,4,5,6,7,8,9">All digits</option>
-	      <option>Enter digits ...</option>
+	      <option value="0,2,5">2, 5 and zero</option>
+	      <option value="0,2,5,4,3,6,8">2, 5, 4, 3, 6, 8 and zero</option>
+	      <option value="0,1,2,3,4,5,6,7,8,9">all digits</option>
+	      <option>enter digits ...</option>
 	    </datalist>
 	  </p>
 	  <p>
 	    <label for="dividendnumrange">Dividend contains</label>
 	    <input type="text" name="dividendnumrange" id="dividendnumrange" pattern="\d(,\d)*" title="digits, separated by comma, eg. 1,3" list="predividendnumrange" value="{{.DividendNumRange}}"/>
 	    <datalist id="predividendnumrange">
-	      <option value="0,1,2,3,4,5">The digits upto 5 and zero</option>
-	      <option value="6,7,8,9,0">The digits greater than 5 and zero</option>
-	      <option value="0,1,2,3,4,5,6,7,8,9">All digits</option>
-	      <option>Enter digits ...</option>
+	      <option value="0,1,2,3,4,5">the digits upto 5 and zero</option>
+	      <option value="6,7,8,9,0">the digits greater than 5 and zero</option>
+	      <option value="0,1,2,3,4,5,6,7,8,9">all digits</option>
+	      <option>enter digits ...</option>
 	    </datalist>
 	  </p>
         </div>
