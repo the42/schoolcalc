@@ -19,9 +19,11 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -372,23 +374,22 @@ var excercisefuncMap = template.FuncMap{
 	"setStrOptionSelected": setStrOptionSelected,
 }
 
+type Range struct {
+	Lower, Upper int
+}
+
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	level, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("level")))
-
-	dividendrange := strings.TrimSpace(req.URL.Query().Get("dividendrange"))
 	signdividend, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdividend")))
-
-	divisorrange := strings.TrimSpace(req.URL.Query().Get("divisorrange"))
 	signdivisor, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdivisor")))
 
-	divisornumrange := strings.TrimSpace(req.URL.Query().Get("divisornumrange"))
-	dividendnumrange := strings.TrimSpace(req.URL.Query().Get("dividendnumrange"))
-
 	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
-		Level:         level,
-		DividendRange: dividendrange, DivisorRange: divisorrange,
-		DividendNumRange: dividendnumrange, DivisorNumRange: divisornumrange,
-		SignDividend: signdividend, SignDivisor: signdivisor,
+		Level:            level,
+		DividendRange:    strings.TrimSpace(req.URL.Query().Get("dividendrange")),
+		DivisorRange:     strings.TrimSpace(req.URL.Query().Get("divisorrange")),
+		DividendNumRange: strings.TrimSpace(req.URL.Query().Get("dividendnumrange")),
+		DivisorNumRange:  strings.TrimSpace(req.URL.Query().Get("divisornumrange")),
+		SignDividend:     signdividend, SignDivisor: signdivisor,
 	}
 
 	strnumberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
@@ -420,6 +421,35 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		errstring := fmt.Sprintf("Template file for language '%s' not found, resorting to default language '%s'", lang, defaultlang)
 		log.Printf(errstring)
 		page.Error = append(page.Error, errstring)
+	}
+
+	if page.Level > 0 {
+		filter := make(map[rune]struct{})
+
+		for _, value := range page.DividendNumRange {
+			if unicode.IsDigit(value) {
+				filter[value] = struct{}{}
+			}
+		}
+		var dividendfilter string
+		for key, _ := range filter {
+			dividendfilter += string(key)
+		}
+
+		filter = make(map[rune]struct{})
+		for _, value := range page.DivisorNumRange {
+			if unicode.IsDigit(value) {
+				filter[value] = struct{}{}
+			}
+		}
+		var divisorfilter string
+		for key, _ := range filter {
+			divisorfilter += string(key)
+		}
+		
+		re := regexp.MustCompile("(\\d+)(-(\\d+))*")
+		founds := re.FindStringSubmatch(page.DividendRange)
+
 	}
 
 	return tpl.Execute(w, page)
