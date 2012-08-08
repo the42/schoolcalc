@@ -446,10 +446,39 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		for key, _ := range filter {
 			divisorfilter += string(key)
 		}
-		
-		re := regexp.MustCompile("(\\d+)(-(\\d+))*")
-		founds := re.FindStringSubmatch(page.DividendRange)
 
+		re := regexp.MustCompile("(\\d+)(-\\d+)?")
+
+		founds := re.FindStringSubmatch(page.DividendRange)
+		var mindividendrange = 1
+		var maxdividendrange int
+		if len(founds) == 3 {
+			if founds[2] == "" {
+				maxdividendrange, _ = strconv.Atoi(founds[1])
+			} else {
+				mindividendrange, _ = strconv.Atoi(founds[1])
+				maxdividendrange, _ = strconv.Atoi(founds[2][1:])
+			}
+		} else {
+			maxdividendrange = 8
+		}
+
+		founds = re.FindStringSubmatch(page.DivisorRange)
+		var mindivisorrange = 1
+		var maxdivisorrange int
+		if len(founds) == 3 {
+			if founds[2] == "" {
+				maxdivisorrange, _ = strconv.Atoi(founds[1])
+			} else {
+				mindivisorrange, _ = strconv.Atoi(founds[1])
+				maxdivisorrange, _ = strconv.Atoi(founds[2][1:])
+			}
+		} else {
+			maxdivisorrange = 4
+		}
+
+		_, _ = mindividendrange, maxdividendrange
+		_, _ = mindivisorrange, maxdivisorrange
 	}
 
 	return tpl.Execute(w, page)
