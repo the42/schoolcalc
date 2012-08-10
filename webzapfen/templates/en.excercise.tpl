@@ -32,7 +32,7 @@
 	  <h3>Dividend/Divisor Size</h3>
 	  <p>
 	    <label for="dividendrange">Range of digits in dividend</label>
-	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" pattern="\d+(-\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DividendRange}}" size="6"/>
+	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" pattern="-?\d+( - -?\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DividendRange}}" size="6"/>
 	    <label for="signdividend">Sign of dividend</label>
 	    <select name="signdividend" id="signdividend" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDividend "positive"}}
@@ -42,7 +42,7 @@
 	  </p>
 	  <p>
 	    <label for="divisorrange">Range of digits in divisor</label>
-	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" pattern="\d+(-\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DivisorRange}}" size="6"/>
+	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" pattern="-?\d+( - -?\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DivisorRange}}" size="6"/>
 	    <label for="signdivisor">Sign of divisor</label>
 	    <select name="signdivisor" id="signdivisor" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDivisor "positive"}}
@@ -92,7 +92,7 @@
     function setInputFieldstoLevel() {
       switch(document.forms[0].level.value) {
       case "1":
-        document.forms[0].dividendrange.value = "1-2";
+        document.forms[0].dividendrange.value = "1 - 2";
         break;
       case "5":
         alert("You rock!");
@@ -101,7 +101,7 @@
     }
 
     function setSelectiontoDefault() {
-      document.forms[0].level[0].selected = "6";
+      document.forms[0].level[1].selected = "selected";
     }
 
     function alterVisibility() {

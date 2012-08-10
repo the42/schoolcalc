@@ -449,17 +449,17 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 			divisorfilter += string(key)
 		}
 
-		re := regexp.MustCompile("(\\d+)(-\\d+)?")
+		re := regexp.MustCompile("(-?\\d+)( - (-?\\d+))?")
 
 		founds := re.FindStringSubmatch(page.DividendRange)
 		var mindividendrange = 1
 		var maxdividendrange int
-		if len(founds) == 3 {
-			if founds[2] == "" {
+		if len(founds) == 4 {
+			if founds[3] == "" {
 				maxdividendrange, _ = strconv.Atoi(founds[1])
 			} else {
 				mindividendrange, _ = strconv.Atoi(founds[1])
-				maxdividendrange, _ = strconv.Atoi(founds[2][1:])
+				maxdividendrange, _ = strconv.Atoi(founds[3])
 			}
 		} else {
 			maxdividendrange = 8
@@ -468,12 +468,12 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		founds = re.FindStringSubmatch(page.DivisorRange)
 		var mindivisorrange = 1
 		var maxdivisorrange int
-		if len(founds) == 3 {
-			if founds[2] == "" {
+		if len(founds) == 4 {
+			if founds[3] == "" {
 				maxdivisorrange, _ = strconv.Atoi(founds[1])
 			} else {
 				mindivisorrange, _ = strconv.Atoi(founds[1])
-				maxdivisorrange, _ = strconv.Atoi(founds[2][1:])
+				maxdivisorrange, _ = strconv.Atoi(founds[3])
 			}
 		} else {
 			maxdivisorrange = 4
@@ -481,6 +481,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 
 		_, _ = mindividendrange, maxdividendrange
 		_, _ = mindivisorrange, maxdivisorrange
+
 	}
 
 	return tpl.Execute(w, page)
