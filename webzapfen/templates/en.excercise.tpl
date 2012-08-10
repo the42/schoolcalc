@@ -7,6 +7,7 @@
       <label for="levelsetter">Difficulty level</label>
       <select name="level" id="levelsetter">
 	{{setIntOptionSelected 0 .Level "Select excercise level..."}}
+	{{setIntOptionSelected 6 .Level "user defined"}}
 	{{setIntOptionSelected 1 .Level "Beginner"}}
 	{{setIntOptionSelected 2 .Level "Apprentice"}}
 	{{setIntOptionSelected 3 .Level "Sophomore"}}
@@ -22,7 +23,8 @@
       <input type="submit" value="Submit"/>
     </p>
     <p>
-      <a href="#" id="togglevisibility" ></a>
+      <button id="visibleb" type="button"></button>
+      <input type="hidden" id="visiblef" name="visiblef" value="{{.Visibility}}"/>
     </p>
     <div id="excercisedetails">
       <section class="group1">
@@ -99,23 +101,35 @@
     }
 
     function setSelectiontoDefault() {
-      document.forms[0].level[0].selected = "1";
+      document.forms[0].level[0].selected = "6";
     }
 
     function alterVisibility() {
       var area = document.getElementById('excercisedetails');
-      var button = document.getElementById('togglevisibility');
+      var buttonb = document.getElementById('visibleb');
+      var visiblef = document.getElementById('visiblef');
       if ( getComputedStyle(area).getPropertyValue('display') == 'none') {
         area.style.display = 'block';
-        button.innerHTML = "Hide details";
+	buttonb.innerHTML="Hide details"
+	visiblef.value="on"
       } else {
         area.style.display = 'none';
-        button.innerHTML = "Show details";
+	buttonb.innerHTML="Show details"
+        visiblef.value=""
       }
     }
 
-    var buttonvisiblearea = document.getElementById('togglevisibility');
-    buttonvisiblearea.innerHTML="Hide details";
+    var area = document.getElementById('excercisedetails');
+    var buttonb = document.getElementById('visibleb');
+    if ( document.forms[0].visiblef.value=="on") {
+      buttonb.innerHTML="Hide details"
+      area.style.display = 'block';
+    } else {
+      area.style.display = 'none';
+      buttonb.innerHTML="Show details"
+    }  
+
+    var buttonvisiblearea = document.getElementById('visibleb');
     buttonvisiblearea.addEventListener('click', alterVisibility);
 
     var details = document.getElementsByClassName('excercisedetail');

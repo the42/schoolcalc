@@ -349,6 +349,7 @@ type excersisePage struct {
 	Level                             int
 	SignDividend, SignDivisor         int
 	DivisorNumRange, DividendNumRange string
+	Visibility                        string
 }
 
 func setIntOptionSelected(setval, compval int, displaystring string) template.HTML {
@@ -390,6 +391,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		DividendNumRange: strings.TrimSpace(req.URL.Query().Get("dividendnumrange")),
 		DivisorNumRange:  strings.TrimSpace(req.URL.Query().Get("divisornumrange")),
 		SignDividend:     signdividend, SignDivisor: signdivisor,
+		Visibility: strings.TrimSpace(req.URL.Query().Get("visiblef")),
 	}
 
 	strnumberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
