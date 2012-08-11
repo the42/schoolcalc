@@ -29,10 +29,12 @@
     <div id="excercisedetails">
       <section class="group1">
         <div class="inputArea">
-	  <h3>Dividend/Divisor Size</h3>
+	  <h3>Dividend/Divisor Range</h3>
 	  <p>
-	    <label for="dividendrange">Range of digits in dividend</label>
-	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" pattern="-?\d+( - -?\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DividendRange}}" size="6"/>
+	    <label for="dividendrange">Dividend range</label>
+	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" value="{{.DividendRange}}" size="6"
+              pattern="^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$"
+              title="a number eg. 999 which means from one to 999 or a range, eg. -0.9 - -0.001 (blank between range specifier is significant!)" />
 	    <label for="signdividend">Sign of dividend</label>
 	    <select name="signdividend" id="signdividend" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDividend "positive"}}
@@ -41,8 +43,10 @@
 	    </select>
 	  </p>
 	  <p>
-	    <label for="divisorrange">Range of digits in divisor</label>
-	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" pattern="-?\d+( - -?\d+)?" title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits" value="{{.DivisorRange}}" size="6"/>
+	    <label for="divisorrange">Divisor range</label>
+	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" value="{{.DivisorRange}}" size="6"
+              pattern="^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$"
+              title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits"/>
 	    <label for="signdivisor">Sign of divisor</label>
 	    <select name="signdivisor" id="signdivisor" class="changeexcercisedetail">
 	      {{setIntOptionSelected -1 .SignDivisor "positive"}}

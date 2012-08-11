@@ -341,6 +341,11 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
+func genbigInt(size int) *big.Int {
+	return nil
+
+}
+
 type excersisePage struct {
 	rootPage
 	DividendRange, DivisorRange       string
@@ -449,41 +454,40 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 			divisorfilter += string(key)
 		}
 
-		re := regexp.MustCompile("(-?\\d+)( - (-?\\d+))?")
+		re := regexp.MustCompile(`^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$`)
 
 		founds := re.FindStringSubmatch(page.DividendRange)
-		var mindividendrange = 1
-		var maxdividendrange int
-		if len(founds) == 4 {
-			if founds[3] == "" {
-				maxdividendrange, _ = strconv.Atoi(founds[1])
+		//fmt.Printf("%V\n", founds)
+		var mindividend = "1"
+		var maxdividend string
+		if len(founds) == 8 {
+			if founds[5] == "" {
+				maxdividend = founds[1]
 			} else {
-				mindividendrange, _ = strconv.Atoi(founds[1])
-				maxdividendrange, _ = strconv.Atoi(founds[3])
+				mindividend = founds[1]
+				maxdividend = founds[5]
 			}
 		} else {
-			maxdividendrange = 8
+			maxdividend = "8"
 		}
 
 		founds = re.FindStringSubmatch(page.DivisorRange)
-		var mindivisorrange = 1
-		var maxdivisorrange int
-		if len(founds) == 4 {
-			if founds[3] == "" {
-				maxdivisorrange, _ = strconv.Atoi(founds[1])
+		// fmt.Printf("%V\n", founds)
+		var mindivisor = "1"
+		var maxdivisor string
+		if len(founds) == 8 {
+			if founds[5] == "" {
+				maxdivisor = founds[1]
 			} else {
-				mindivisorrange, _ = strconv.Atoi(founds[1])
-				maxdivisorrange, _ = strconv.Atoi(founds[3])
+				mindivisor = founds[1]
+				maxdivisor = founds[5]
 			}
 		} else {
-			maxdivisorrange = 4
+			maxdivisor = "4"
 		}
 
-		_, _ = mindividendrange, maxdividendrange
-		_, _ = mindivisorrange, maxdivisorrange
-
+		fmt.Println(mindividend, maxdividend, mindivisor, maxdivisor)
 	}
-
 	return tpl.Execute(w, page)
 }
 
