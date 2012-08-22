@@ -16,6 +16,7 @@ import (
 	"io"
 	"log"
 	"math/big"
+	"math/rand"
 	"net/http"
 	"os"
 	"path"
@@ -23,6 +24,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -341,15 +343,76 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
-func genbigInt(size int) *big.Int {
-	return nil
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func GenExcerciseRandomNumber(lower, upper string) string {
+
+	var lowerints string
+	var lowerpointpos, remainlowerlen int
+	lowerratstring := strings.Trim(lower, " ")
+	if lowerpointpos = strings.IndexRune(lowerratstring, '.'); lowerpointpos > 0 {
+		remainlowerlen = len(lowerratstring[lowerpointpos+1:])
+		lowerints = lowerratstring[:lowerpointpos] + lowerratstring[lowerpointpos+1:]
+	} else {
+		lowerints = lowerratstring
+	}
+
+	var upperints string
+	var upperpointpos, remainupperlen int
+	upperratstring := strings.Trim(upper, " ")
+	if upperpointpos = strings.IndexRune(upperratstring, '.'); upperpointpos > 0 {
+		remainupperlen = len(upperratstring[upperpointpos+1:])
+		upperints = upperratstring[:upperpointpos] + upperratstring[upperpointpos+1:]
+	} else {
+		upperints = upperratstring
+	}
+
+	if remainlowerlen > remainupperlen {
+		upperints = upperints + strings.Repeat("0", remainlowerlen-remainupperlen)
+	} else if remainlowerlen < remainupperlen {
+		lowerints = lowerints + strings.Repeat("0", remainupperlen-remainlowerlen)
+	}
+
+	lowerbigint := new(big.Int)
+	lowerbigint, _ = lowerbigint.SetString(lowerints, 10)
+	upperbigint := new(big.Int)
+	upperbigint, _ = upperbigint.SetString(upperints, 10)
+
+	diff := big.NewInt(0)
+	diff = diff.Sub(upperbigint, lowerbigint)
+
+	random := new(big.Int)
+	random = random.Rand(rand.New(rand.NewSource(time.Now().Unix())), diff)
+	randomnumstr := random.Add(random, lowerbigint).String()
+
+	if remainlowerlen > 0 || remainupperlen > 0 {
+		randompoint := len(randomnumstr) - max(remainupperlen, remainlowerlen)
+		randomnumstr = randomnumstr[:randompoint] + "." + randomnumstr[randompoint:]
+	}
+
+	if len(randomnumstr) > 1 && randomnumstr[0] == '-' && randomnumstr[1] == '.' {
+		randomnumstr = "-0." + randomnumstr[2:]
+	}
+
+	return randomnumstr
 }
 
 type excersisePage struct {
 	rootPage
 	DividendRange, DivisorRange       string
-	MaxDigitisPastPointUntilZero      int
+	MaxDigitisPastPointUntilZero      string
 	NumberofExcersises                int
 	Level                             int
 	SignDividend, SignDivisor         int
@@ -380,10 +443,6 @@ var excercisefuncMap = template.FuncMap{
 	"setStrOptionSelected": setStrOptionSelected,
 }
 
-type Range struct {
-	Lower, Upper int
-}
-
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	level, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("level")))
 	signdividend, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdividend")))
@@ -395,6 +454,7 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		DivisorRange:     strings.TrimSpace(req.URL.Query().Get("divisorrange")),
 		DividendNumRange: strings.TrimSpace(req.URL.Query().Get("dividendnumrange")),
 		DivisorNumRange:  strings.TrimSpace(req.URL.Query().Get("divisornumrange")),
+		MaxDigitisPastPointUntilZero: strings.TrimSpace(req.URL.Query().Get("numremz")),
 		SignDividend:     signdividend, SignDivisor: signdivisor,
 		Visibility: strings.TrimSpace(req.URL.Query().Get("visiblef")),
 	}
@@ -408,14 +468,6 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		}
 	} else {
 		page.NumberofExcersises = 1
-	}
-	strmaxdigitispastpointuntilzero := strings.TrimSpace(req.URL.Query().Get("numremz"))
-	if len(strmaxdigitispastpointuntilzero) > 0 {
-		if maxdigitispastpointuntilzero, err := strconv.Atoi(strmaxdigitispastpointuntilzero); err == nil {
-			page.MaxDigitisPastPointUntilZero = maxdigitispastpointuntilzero
-		} else {
-			page.Error = append(page.Error, fmt.Sprintf("Parameter 'numremz' tainted: %s", err))
-		}
 	}
 
 	languages := []string{lang, defaultlang}
@@ -457,7 +509,6 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 		re := regexp.MustCompile(`^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$`)
 
 		founds := re.FindStringSubmatch(page.DividendRange)
-		//fmt.Printf("%V\n", founds)
 		var mindividend = "1"
 		var maxdividend string
 		if len(founds) == 8 {
@@ -468,11 +519,10 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 				maxdividend = founds[5]
 			}
 		} else {
-			maxdividend = "8"
+			maxdividend = "99999"
 		}
 
 		founds = re.FindStringSubmatch(page.DivisorRange)
-		// fmt.Printf("%V\n", founds)
 		var mindivisor = "1"
 		var maxdivisor string
 		if len(founds) == 8 {
@@ -483,10 +533,12 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 				maxdivisor = founds[5]
 			}
 		} else {
-			maxdivisor = "4"
+			maxdivisor = "9999"
 		}
 
+		// TODO: continue
 		fmt.Println(mindividend, maxdividend, mindivisor, maxdivisor)
+		fmt.Println(GenExcerciseRandomNumber(mindividend, maxdividend))
 	}
 	return tpl.Execute(w, page)
 }
