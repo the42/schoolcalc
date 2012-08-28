@@ -32,27 +32,15 @@
 	  <h3>Dividend/Divisor Range</h3>
 	  <p>
 	    <label for="dividendrange">Dividend range</label>
-	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" value="{{.DividendRange}}" size="6"
+	    <input type="text" class="excercisedetail" id="dividendrange" name="dividendrange" value="{{.DividendRange}}"
               pattern="^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$"
-              title="a number eg. 999 which means from one to 999 or a range, eg. -0.9 - -0.001 (blank between range specifier is significant!)" />
-	    <label for="signdividend">Sign of dividend</label>
-	    <select name="signdividend" id="signdividend" class="changeexcercisedetail">
-	      {{setIntOptionSelected -1 .SignDividend "positive"}}
-	      {{setIntOptionSelected 1 .SignDividend "negative"}}
-	      {{setIntOptionSelected 0 .SignDividend "automatic"}}
-	    </select>
+              title="a number eg. 999 which means from one to 999 or a range, eg. -0.9 - -0.001 (blank between range specifier is significant!)"/>
 	  </p>
 	  <p>
 	    <label for="divisorrange">Divisor range</label>
-	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" value="{{.DivisorRange}}" size="6"
+	    <input type="text" class="excercisedetail" id="divisorrange" name="divisorrange" value="{{.DivisorRange}}"
               pattern="^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$"
               title="a number eg. 2 which means from zero to 2 or a range, eg. 2-3, which means 2 to 3 digits"/>
-	    <label for="signdivisor">Sign of divisor</label>
-	    <select name="signdivisor" id="signdivisor" class="changeexcercisedetail">
-	      {{setIntOptionSelected -1 .SignDivisor "positive"}}
-	      {{setIntOptionSelected 1 .SignDivisor "negative"}}
-	      {{setIntOptionSelected 0 .SignDivisor "automatic"}}
-	    </select>
 	  </p>
         </div>
       </section>
@@ -86,7 +74,7 @@
 	  <h3>Decimal Places</h3>
 	  <p>
 	    <label for="numremz">Number of decimal places</label>
-	    <input type="text" class="excercisedetail" name="numremz" id="numremz" pattern="\d*" title="only numbers allowed" value="{{.MaxDigitisPastPointUntilZero}}" size="10"/> 
+	    <input type="text" class="excercisedetail" name="numremz" id="numremz" pattern="\d*" title="only numbers allowed" value="{{.MaxDigitisPastPointUntilZero}}"/> 
 	  </p>
         </div>
       </section>
