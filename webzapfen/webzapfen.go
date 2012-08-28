@@ -22,6 +22,7 @@ import (
 	"path"
 	"regexp"
 	"runtime/debug"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -343,13 +344,6 @@ func zapfenHandler(w io.Writer, req *http.Request, lang string) error {
 	return tpl.Execute(w, page)
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -359,36 +353,31 @@ func max(a, b int) int {
 
 func GenExcerciseRandomNumber(lower, upper string) string {
 
-	var lowerints string
-	var lowerpointpos, remainlowerlen int
-	lowerratstring := strings.Trim(lower, " ")
-	if lowerpointpos = strings.IndexRune(lowerratstring, '.'); lowerpointpos > 0 {
-		remainlowerlen = len(lowerratstring[lowerpointpos+1:])
-		lowerints = lowerratstring[:lowerpointpos] + lowerratstring[lowerpointpos+1:]
-	} else {
-		lowerints = lowerratstring
+	lower = strings.TrimSpace(lower)
+	upper = strings.TrimSpace(upper)
+
+	var remainlowerlen int
+	if lowerpointpos := strings.IndexRune(lower, '.'); lowerpointpos > 0 {
+		remainlowerlen = len(lower[lowerpointpos+1:])
+		lower = lower[:lowerpointpos] + lower[lowerpointpos+1:]
 	}
 
-	var upperints string
-	var upperpointpos, remainupperlen int
-	upperratstring := strings.Trim(upper, " ")
-	if upperpointpos = strings.IndexRune(upperratstring, '.'); upperpointpos > 0 {
-		remainupperlen = len(upperratstring[upperpointpos+1:])
-		upperints = upperratstring[:upperpointpos] + upperratstring[upperpointpos+1:]
-	} else {
-		upperints = upperratstring
+	var remainupperlen int
+	if upperpointpos := strings.IndexRune(upper, '.'); upperpointpos > 0 {
+		remainupperlen = len(upper[upperpointpos+1:])
+		upper = upper[:upperpointpos] + upper[upperpointpos+1:]
 	}
 
 	if remainlowerlen > remainupperlen {
-		upperints = upperints + strings.Repeat("0", remainlowerlen-remainupperlen)
+		upper += strings.Repeat("0", remainlowerlen-remainupperlen)
 	} else if remainlowerlen < remainupperlen {
-		lowerints = lowerints + strings.Repeat("0", remainupperlen-remainlowerlen)
+		lower += strings.Repeat("0", remainupperlen-remainlowerlen)
 	}
 
 	lowerbigint := new(big.Int)
-	lowerbigint, _ = lowerbigint.SetString(lowerints, 10)
+	lowerbigint, _ = lowerbigint.SetString(lower, 10)
 	upperbigint := new(big.Int)
-	upperbigint, _ = upperbigint.SetString(upperints, 10)
+	upperbigint, _ = upperbigint.SetString(upper, 10)
 
 	diff := big.NewInt(0)
 	diff = diff.Sub(upperbigint, lowerbigint)
@@ -415,7 +404,6 @@ type excersisePage struct {
 	MaxDigitisPastPointUntilZero      string
 	NumberofExcersises                int
 	Level                             int
-	SignDividend, SignDivisor         int
 	DivisorNumRange, DividendNumRange string
 	Visibility                        string
 }
@@ -428,35 +416,33 @@ func setIntOptionSelected(setval, compval int, displaystring string) template.HT
 	return template.HTML(`<option value="` + strconv.Itoa(setval) + `"` + selected + ">" + displaystring + "</option>")
 }
 
-func setStrOptionSelected(setval, compval string, displaystring string) template.HTML {
-	var selected string
-	if setval == compval {
-		selected = ` selected="selected"`
+func genSortedExcerciseFilter(filter string) (intfilter []int) {
+	for _, value := range filter {
+		if unicode.IsDigit(value) {
+			intfilter = append(intfilter, int(value))
+		}
 	}
-	return template.HTML(`<option value="` + setval + `"` + selected + ">" + displaystring + "</option>")
+	sort.Ints(intfilter)
+	return
 }
 
 var excercisefuncMap = template.FuncMap{
 	"langselector":         langselector,
 	"rendermenu":           rendermenu,
 	"setIntOptionSelected": setIntOptionSelected,
-	"setStrOptionSelected": setStrOptionSelected,
 }
 
 func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	level, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("level")))
-	signdividend, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdividend")))
-	signdivisor, _ := strconv.Atoi(strings.TrimSpace(req.URL.Query().Get("signdivisor")))
 
 	page := &excersisePage{rootPage: rootPage{CurrLang: lang, URL: req.URL.Path},
-		Level:            level,
-		DividendRange:    strings.TrimSpace(req.URL.Query().Get("dividendrange")),
-		DivisorRange:     strings.TrimSpace(req.URL.Query().Get("divisorrange")),
-		DividendNumRange: strings.TrimSpace(req.URL.Query().Get("dividendnumrange")),
-		DivisorNumRange:  strings.TrimSpace(req.URL.Query().Get("divisornumrange")),
+		Level:                        level,
+		DividendRange:                strings.TrimSpace(req.URL.Query().Get("dividendrange")),
+		DivisorRange:                 strings.TrimSpace(req.URL.Query().Get("divisorrange")),
+		DividendNumRange:             strings.TrimSpace(req.URL.Query().Get("dividendnumrange")),
+		DivisorNumRange:              strings.TrimSpace(req.URL.Query().Get("divisornumrange")),
 		MaxDigitisPastPointUntilZero: strings.TrimSpace(req.URL.Query().Get("numremz")),
-		SignDividend:     signdividend, SignDivisor: signdivisor,
-		Visibility: strings.TrimSpace(req.URL.Query().Get("visiblef")),
+		Visibility:                   strings.TrimSpace(req.URL.Query().Get("visiblef")),
 	}
 
 	strnumberofexcersises := strings.TrimSpace(req.URL.Query().Get("n"))
@@ -472,7 +458,6 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 
 	languages := []string{lang, defaultlang}
 	tpl, idx, err := loadTemplate("DivisionSetup", excercisefuncMap, languages, conf_roottemplatedir()+roottplfilename, conf_roottemplatedir()+"%s."+excersisefilename)
-
 	if err != nil {
 		panic(err)
 	}
@@ -483,28 +468,11 @@ func excersiseHandler(w io.Writer, req *http.Request, lang string) error {
 	}
 
 	if page.Level > 0 {
-		filter := make(map[rune]struct{})
 
-		for _, value := range page.DividendNumRange {
-			if unicode.IsDigit(value) {
-				filter[value] = struct{}{}
-			}
-		}
-		var dividendfilter string
-		for key, _ := range filter {
-			dividendfilter += string(key)
-		}
+		divisorfilter := genSortedExcerciseFilter(page.DividendNumRange)
+		dividendfilter := genSortedExcerciseFilter(page.DivisorNumRange)
 
-		filter = make(map[rune]struct{})
-		for _, value := range page.DivisorNumRange {
-			if unicode.IsDigit(value) {
-				filter[value] = struct{}{}
-			}
-		}
-		var divisorfilter string
-		for key, _ := range filter {
-			divisorfilter += string(key)
-		}
+		_, _ = divisorfilter, dividendfilter
 
 		re := regexp.MustCompile(`^([-]?(0|[1-9]\d*)(\.\d+)?)( - ([-]?(0|[1-9]\d*)(\.\d+)?))?$`)
 
