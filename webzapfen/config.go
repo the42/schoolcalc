@@ -2,9 +2,9 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 //
-// configuration for webzapfen
-//
 // +build !appengine
+//
+// configuration for webzapfen
 package main
 
 import (
