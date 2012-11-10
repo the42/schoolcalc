@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/the42/schoolcalc"
+	"github.com/the42/schoolcalc/schoolcalc"
 	"html/template"
 	"io"
 	"log"

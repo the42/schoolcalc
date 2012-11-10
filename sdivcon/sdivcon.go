@@ -10,7 +10,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/the42/schoolcalc"
+	"github.com/the42/schoolcalc/schoolcalc"
 	"io"
 	"os"
 	"strings"
