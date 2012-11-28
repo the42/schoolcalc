@@ -43,7 +43,7 @@ func readConfig(filename string, conf *config) {
 
 func createorreturnconfig(conf *config) *config {
 	if conf == nil {
-		conf = &config{RootDomain: "schoolcalc.hoechtl.org",
+		conf = &config{RootDomain: "schoolcalc.hoechtl.at",
 			Binding:         os.Getenv("PORT"),
 			Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
 			RootTemplateDir: "./templates/",
@@ -53,7 +53,6 @@ func createorreturnconfig(conf *config) *config {
 	readConfig(*configFileName, conf)
 	if conf.Binding == "" {
 		conf.Binding = "5000"
-
 	}
 	return conf
 }
