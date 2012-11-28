@@ -3,8 +3,6 @@
 // that can be found in the LICENSE file.
 
 // main program for schoolcalc, a web site to help learning to divide.
-
-// +build !appengine
 package main
 
 import (
@@ -36,5 +34,5 @@ func Log(handler http.Handler) http.Handler {
 }
 
 func main() {
-	http.ListenAndServe(conf_binding(), Log(http.DefaultServeMux))
+	http.ListenAndServe(":"+conf_binding(), Log(http.DefaultServeMux))
 }

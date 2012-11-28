@@ -2,8 +2,6 @@
 // Use of this source code is governed by a Modified BSD License
 // that can be found in the LICENSE file.
 //
-// +build !appengine
-//
 // configuration for webzapfen
 package main
 
@@ -45,14 +43,17 @@ func readConfig(filename string, conf *config) {
 
 func createorreturnconfig(conf *config) *config {
 	if conf == nil {
-		conf = &config{RootDomain: "webzapfen.hoechtl.at",
-			Binding:         ":1112",
+		conf = &config{RootDomain: "schoolcalc.hoechtl.org",
+			Binding:         os.Getenv("PORT"),
 			Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
 			RootTemplateDir: "./templates/",
 			TimeOut:         3600}
+	}
+	flag.Parse()
+	readConfig(*configFileName, conf)
+	if conf.Binding == "" {
+		conf.Binding = "5000"
 
-		flag.Parse()
-		readConfig(*configFileName, conf)
 	}
 	return conf
 }
