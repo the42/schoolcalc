@@ -50,7 +50,7 @@ var menustructure = []menulayout{
 	{"/", map[string]string{"de": "Home", "en": "Home"}},
 	{"/excercise/", map[string]string{"de": "Übungen", "en": "Excercises"}},
 	{"/division/", map[string]string{"de": "Division", "en": "Division"}},
-	{"/zapfen/", map[string]string{"de": "Webzapfen", "en": "zopfen"}},
+	{"/zapfen/", map[string]string{"de": "Webzapfen", "en": "Webzapfen"}},
 }
 
 type webhandler struct {
