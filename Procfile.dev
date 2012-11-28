@@ -1,1 +1,1 @@
-web: sh -c 'cd ./webzapfen/ && exec webzapfen --config=config.json'
+web: sh -c 'cd ./webzapfen/ && exec webzapfen'
