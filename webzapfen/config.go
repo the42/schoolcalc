@@ -46,16 +46,16 @@ func createorreturnconfig(conf *config) *config {
 	if conf == nil {
 		conf = &config{RootDomain: "schoolcalc.hoechtl.org",
 			LocalBinding:    os.Getenv("PORT"),
-			OuterPort:       "",
+			OuterPort:       ":5000",
 			Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
 			RootTemplateDir: "./templates/",
 			TimeOut:         3600}
-	}
-	flag.Parse()
-	readConfig(*configFileName, conf)
-	if conf.LocalBinding == "" {
-		conf.LocalBinding = "5000"
-		conf.OuterPort = ":5000"
+
+		flag.Parse()
+		readConfig(*configFileName, conf)
+		if conf.LocalBinding == "" {
+			conf.LocalBinding = "5000"
+		}
 	}
 	return conf
 }
