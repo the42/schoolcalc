@@ -596,7 +596,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		} else {
 			scheme = "https://"
 		}
-		http.Redirect(w, req, scheme+language+"."+conf_rootdomain()+":"+conf_binding()+redirect, http.StatusSeeOther)
+		http.Redirect(w, req, scheme+language+"."+conf_rootdomain()+conf_outerport()+redirect, http.StatusSeeOther)
 		return
 	}
 

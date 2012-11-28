@@ -34,5 +34,5 @@ func Log(handler http.Handler) http.Handler {
 }
 
 func main() {
-	http.ListenAndServe(":"+conf_binding(), Log(http.DefaultServeMux))
+	http.ListenAndServe(":"+conf_localbinding(), Log(http.DefaultServeMux))
 }

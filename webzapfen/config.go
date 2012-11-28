@@ -18,7 +18,8 @@ var configFileName = flag.String("config", "config.json", "location of JSON conf
 
 type config struct {
 	RootDomain      string
-	Binding         string
+	LocalBinding    string
+	OuterPort       string
 	RootTemplateDir string
 	Languages       map[string]string
 	TimeOut         int
@@ -43,16 +44,18 @@ func readConfig(filename string, conf *config) {
 
 func createorreturnconfig(conf *config) *config {
 	if conf == nil {
-		conf = &config{RootDomain: "schoolcalc.hoechtl.at",
-			Binding:         os.Getenv("PORT"),
+		conf = &config{RootDomain: "schoolcalc.hoechtl.org",
+			LocalBinding:    os.Getenv("PORT"),
+			OuterPort:       "",
 			Languages:       map[string]string{"de": "Deutsch", "en": "Englisch"},
 			RootTemplateDir: "./templates/",
 			TimeOut:         3600}
 	}
 	flag.Parse()
 	readConfig(*configFileName, conf)
-	if conf.Binding == "" {
-		conf.Binding = "5000"
+	if conf.LocalBinding == "" {
+		conf.LocalBinding = "5000"
+		conf.OuterPort = ":5000"
 	}
 	return conf
 }
@@ -81,9 +84,14 @@ func conf_languages() map[string]string {
 	return conf.Languages
 }
 
-func conf_binding() string {
+func conf_localbinding() string {
 	conf = createorreturnconfig(conf)
-	return conf.Binding
+	return conf.LocalBinding
+}
+
+func conf_outerport() string {
+	conf = createorreturnconfig(conf)
+	return conf.OuterPort
 }
 
 func conf_roottemplatedir() string {
