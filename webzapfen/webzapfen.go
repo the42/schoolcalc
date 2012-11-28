@@ -539,7 +539,7 @@ func validlanguage(language string) bool {
 }
 
 // ServeHTTP installs a catch-all error recovery for the specific handler functions
-// It may gzip-compress the output depending on webhandler.compress 
+// It may gzip-compress the output depending on webhandler.compress
 func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// error handler: Recover from panic by setting http error 500 and letting the user know the reason
 	defer func() {
@@ -596,7 +596,7 @@ func (wh webhandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		} else {
 			scheme = "https://"
 		}
-		http.Redirect(w, req, scheme+language+"."+conf_rootdomain()+conf_binding()+redirect, http.StatusSeeOther)
+		http.Redirect(w, req, scheme+language+"."+conf_rootdomain()+":"+conf_binding()+redirect, http.StatusSeeOther)
 		return
 	}
 
