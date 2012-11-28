@@ -1,3 +1,4 @@
 {
-        "RootDomain": "schoolcalc.allowed.org"
+        "RootDomain": "schoolcalc.allowed.org",
+	"OuterPort":  ":80"
 }
